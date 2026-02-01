@@ -1,13 +1,23 @@
 // Main Application Logic
 import { signup, login, logout, onAuthChange } from './auth.js';
 import { saveUserData, subscribeToUserData } from './data-manager.js';
+import { calculateHouseholdSS } from './social-security.js';
 
 class RetirementApp {
     constructor() {
         this.currentUser = null;
         this.currentView = 'login';
         this.currentTab = 'family';
-        this.familyMembers = [{ id: 1, name: '', age: 0, relation: 'Self' }];
+        this.familyMembers = [{ 
+            id: 1, 
+            name: '', 
+            birthYear: new Date().getFullYear() - 30,
+            relation: 'Self',
+            currentSalary: 0,
+            yearStartedWorking: null,
+            retirementAge: 67,
+            ssCollectionAge: 67
+        }];
         this.incomes = [];
         this.expenses = [];
         this.dataUnsubscribe = null;
@@ -31,7 +41,16 @@ class RetirementApp {
 
         this.dataUnsubscribe = subscribeToUserData(this.currentUser.uid, (data) => {
             if (data) {
-                this.familyMembers = data.familyMembers || [{ id: 1, name: '', age: 0, relation: 'Self' }];
+                this.familyMembers = data.familyMembers || [{ 
+                    id: 1, 
+                    name: '', 
+                    birthYear: new Date().getFullYear() - 30,
+                    relation: 'Self',
+                    currentSalary: 0,
+                    yearStartedWorking: null,
+                    retirementAge: 67,
+                    ssCollectionAge: 67
+                }];
                 this.incomes = data.incomes || [];
                 this.expenses = data.expenses || [];
             }
@@ -72,7 +91,16 @@ class RetirementApp {
 
     // Family Members
     addFamilyMember() {
-        this.familyMembers.push({ id: Date.now(), name: '', age: 0, relation: 'Spouse' });
+        this.familyMembers.push({ 
+            id: Date.now(), 
+            name: '', 
+            birthYear: new Date().getFullYear() - 30,
+            relation: 'Spouse',
+            currentSalary: 0,
+            yearStartedWorking: null,
+            retirementAge: 67,
+            ssCollectionAge: 67
+        });
         this.saveData();
     }
 
@@ -254,24 +282,92 @@ class RetirementApp {
     }
 
     renderFamily() {
+        const currentYear = new Date().getFullYear();
+        
         return `
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Family Members</h2>
-                    <button onclick="app.addFamilyMember()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add</button>
+                    <button onclick="app.addFamilyMember()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add Member</button>
                 </div>
-                ${this.familyMembers.map(m => `
-                    <div class="bg-gray-50 p-4 rounded-lg mb-4 flex gap-4">
-                        <div class="flex-1 grid grid-cols-3 gap-4">
-                            <input type="text" value="${m.name}" onchange="app.updateFamilyMember(${m.id}, 'name', this.value)" placeholder="Name" class="px-3 py-2 border rounded">
-                            <input type="number" value="${m.age}" onchange="app.updateFamilyMember(${m.id}, 'age', parseInt(this.value)||0)" placeholder="Age" class="px-3 py-2 border rounded">
-                            <select value="${m.relation}" onchange="app.updateFamilyMember(${m.id}, 'relation', this.value)" class="px-3 py-2 border rounded">
-                                <option>Self</option><option>Spouse</option><option>Child</option><option>Other</option>
-                            </select>
+                ${this.familyMembers.map(m => {
+                    const age = currentYear - (m.birthYear || currentYear);
+                    return `
+                        <div class="bg-gray-50 p-6 rounded-lg mb-4">
+                            <div class="flex gap-4 mb-4">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <input type="text" value="${m.name || ''}" 
+                                        onchange="app.updateFamilyMember(${m.id}, 'name', this.value)" 
+                                        placeholder="Enter name" 
+                                        class="w-full px-3 py-2 border rounded">
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Birth Year</label>
+                                    <input type="number" value="${m.birthYear || currentYear - 30}" 
+                                        onchange="app.updateFamilyMember(${m.id}, 'birthYear', parseInt(this.value)||${currentYear})" 
+                                        placeholder="1990" 
+                                        class="w-full px-3 py-2 border rounded">
+                                    <p class="text-xs text-gray-500 mt-1">Current age: ${age}</p>
+                                </div>
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Relation</label>
+                                    <select value="${m.relation}" 
+                                        onchange="app.updateFamilyMember(${m.id}, 'relation', this.value)" 
+                                        class="w-full px-3 py-2 border rounded">
+                                        <option ${m.relation === 'Self' ? 'selected' : ''}>Self</option>
+                                        <option ${m.relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
+                                        <option ${m.relation === 'Child' ? 'selected' : ''}>Child</option>
+                                        <option ${m.relation === 'Other' ? 'selected' : ''}>Other</option>
+                                    </select>
+                                </div>
+                                ${this.familyMembers.length > 1 ? `
+                                    <button onclick="app.removeFamilyMember(${m.id})" class="text-red-600 self-start mt-6">🗑️</button>
+                                ` : ''}
+                            </div>
+                            
+                            ${m.relation === 'Self' || m.relation === 'Spouse' ? `
+                                <div class="border-t pt-4 mt-4">
+                                    <h3 class="font-semibold text-gray-700 mb-3">Work & Retirement Planning</h3>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Current Annual Salary ($)</label>
+                                            <input type="number" value="${m.currentSalary || 0}" 
+                                                onchange="app.updateFamilyMember(${m.id}, 'currentSalary', parseFloat(this.value)||0)" 
+                                                placeholder="75000" 
+                                                class="w-full px-3 py-2 border rounded">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Year Started Working</label>
+                                            <input type="number" value="${m.yearStartedWorking || ''}" 
+                                                onchange="app.updateFamilyMember(${m.id}, 'yearStartedWorking', parseInt(this.value)||null)" 
+                                                placeholder="2005" 
+                                                class="w-full px-3 py-2 border rounded">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Desired Retirement Age</label>
+                                            <input type="number" value="${m.retirementAge || 67}" 
+                                                onchange="app.updateFamilyMember(${m.id}, 'retirementAge', parseInt(this.value)||67)" 
+                                                placeholder="67" 
+                                                min="55" max="75"
+                                                class="w-full px-3 py-2 border rounded">
+                                            <p class="text-xs text-gray-500 mt-1">Retirement year: ${(m.birthYear || currentYear) + (m.retirementAge || 67)}</p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Social Security Collection Age</label>
+                                            <input type="number" value="${m.ssCollectionAge || 67}" 
+                                                onchange="app.updateFamilyMember(${m.id}, 'ssCollectionAge', parseInt(this.value)||67)" 
+                                                placeholder="67" 
+                                                min="62" max="70"
+                                                class="w-full px-3 py-2 border rounded">
+                                            <p class="text-xs text-gray-500 mt-1">Start collecting: ${(m.birthYear || currentYear) + (m.ssCollectionAge || 67)}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
                         </div>
-                        ${this.familyMembers.length > 1 ? `<button onclick="app.removeFamilyMember(${m.id})" class="text-red-600">🗑️</button>` : ''}
-                    </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         `;
     }
@@ -281,7 +377,7 @@ class RetirementApp {
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Income Sources</h2>
-                    <button onclick="app.addIncome()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add</button>
+                    <button onclick="app.addIncome()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add Income</button>
                 </div>
                 ${this.incomes.length === 0 ? '<p class="text-gray-500 text-center py-8">No income sources yet</p>' : ''}
                 ${this.incomes.map(i => `
@@ -308,7 +404,7 @@ class RetirementApp {
             <div>
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-2xl font-bold">Expenses</h2>
-                    <button onclick="app.addExpense()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add</button>
+                    <button onclick="app.addExpense()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add Expense</button>
                 </div>
                 ${this.expenses.length === 0 ? '<p class="text-gray-500 text-center py-8">No expenses yet</p>' : ''}
                 ${this.expenses.map(e => `
@@ -328,10 +424,15 @@ class RetirementApp {
     }
 
     renderProjection(income, expenses, surplus) {
+        // Calculate Social Security
+        const ssData = calculateHouseholdSS(this.familyMembers);
+        
         return `
             <div>
                 <h2 class="text-2xl font-bold mb-6">Financial Projection</h2>
-                <div class="grid grid-cols-3 gap-4">
+                
+                <!-- Current Annual Summary -->
+                <div class="grid grid-cols-3 gap-4 mb-8">
                     <div class="bg-blue-50 p-6 rounded-lg">
                         <p class="text-sm text-gray-600">Total Annual Income</p>
                         <p class="text-3xl font-bold text-blue-600">$${income.toLocaleString()}</p>
@@ -344,6 +445,49 @@ class RetirementApp {
                         <p class="text-sm text-gray-600">Annual Surplus/Deficit</p>
                         <p class="text-3xl font-bold ${surplus >= 0 ? 'text-green-600' : 'text-orange-600'}">$${surplus.toLocaleString()}</p>
                     </div>
+                </div>
+                
+                <!-- Social Security Projections -->
+                <div class="bg-white border-2 border-blue-200 rounded-lg p-6 mb-8">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">💰 Social Security Projections</h3>
+                    ${ssData.members.length > 0 ? `
+                        <div class="space-y-4">
+                            ${ssData.members.map(member => `
+                                <div class="bg-blue-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h4 class="font-semibold text-gray-800">${member.name || 'Unnamed'} (${member.relation})</h4>
+                                            <p class="text-sm text-gray-600">Collecting at age ${member.collectionAge}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-2xl font-bold text-blue-600">$${member.monthlyBenefit.toLocaleString()}<span class="text-sm">/mo</span></p>
+                                            <p class="text-sm text-gray-600">$${member.annualBenefit.toLocaleString()}/year</p>
+                                        </div>
+                                    </div>
+                                    ${member.spousalBenefit ? `
+                                        <p class="text-xs text-green-600 mt-2">✓ Includes $${member.spousalBenefit.toLocaleString()}/mo spousal benefit</p>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                            <div class="bg-green-50 p-4 rounded-lg border-2 border-green-300">
+                                <div class="flex justify-between items-center">
+                                    <h4 class="font-semibold text-gray-800">Total Household Social Security</h4>
+                                    <div class="text-right">
+                                        <p class="text-2xl font-bold text-green-600">$${ssData.totalMonthly.toLocaleString()}<span class="text-sm">/mo</span></p>
+                                        <p class="text-sm text-gray-600">$${ssData.totalAnnual.toLocaleString()}/year</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : `
+                        <p class="text-gray-500 text-center py-4">Add salary information to family members to see Social Security projections</p>
+                    `}
+                </div>
+                
+                <div class="bg-gray-50 p-6 rounded-lg">
+                    <h3 class="text-lg font-semibold mb-2">📋 About These Projections</h3>
+                    <p class="text-sm text-gray-600 mb-2">Social Security estimates are based on current salary and assume it represents your career average. Actual benefits may vary based on your complete earnings history.</p>
+                    <p class="text-sm text-gray-600"><strong>Important:</strong> These are estimates only. For accurate benefit information, check your official Social Security statement at <a href="https://www.ssa.gov/myaccount" target="_blank" class="text-blue-600 underline">ssa.gov/myaccount</a></p>
                 </div>
             </div>
         `;
