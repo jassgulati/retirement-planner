@@ -275,31 +275,37 @@ class RetirementApp {
     }
 
     renderIncome() {
-        return `
-            <div>
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Income Sources</h2>
-                    <button onclick="app.addIncome()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add</button>
-                </div>
-                ${this.incomes.length === 0 ? '<p class="text-gray-500 text-center py-8">No income sources yet</p>' : ''}
-                ${this.incomes.map(i => `
-                    <div class="bg-gray-50 p-4 rounded-lg mb-4 flex gap-4">
-                        <div class="flex-1 grid grid-cols-3 gap-4">
-                            <select value="${i.type}" onchange="app.updateIncome(${i.id}, 'type', this.value)" class="px-3 py-2 border rounded">
-                                <option>Salary</option><option>Social Security</option><option>Pension</option><option>Business</option><option>Other</option>
-                            </select>
-                            <select value="${i.person}" onchange="app.updateIncome(${i.id}, 'person', this.value)" class="px-3 py-2 border rounded">
-                                <option value="">Select...</option>
-                                ${this.familyMembers.map(m => `<option value="${m.name}">${m.name||'Unnamed'}</option>`).join('')}
-                            </select>
-                            <input type="number" value="${i.amount}" onchange="app.updateIncome(${i.id}, 'amount', parseFloat(this.value)||0)" placeholder="Amount" class="px-3 py-2 border rounded">
-                        </div>
-                        <button onclick="app.removeIncome(${i.id})" class="text-red-600">🗑️</button>
-                    </div>
-                `).join('')}
+    return `
+        <div>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Income Sources</h2>
+                <button onclick="app.addIncome()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add</button>
             </div>
-        `;
-    }
+            ${this.incomes.length === 0 ? '<p class="text-gray-500 text-center py-8">No income sources yet</p>' : ''}
+            ${this.incomes.map(i => `
+                <div class="bg-gray-50 p-4 rounded-lg mb-4 flex gap-4">
+                    <div class="flex-1 grid grid-cols-3 gap-4">
+                        <select value="${i.type}" onchange="app.updateIncome(${i.id}, 'type', this.value)" class="px-3 py-2 border rounded">
+                            <option value="Salary" ${i.type === 'Salary' ? 'selected' : ''}>Salary</option>
+                            <option value="Social Security" ${i.type === 'Social Security' ? 'selected' : ''}>Social Security</option>
+                            <option value="Pension" ${i.type === 'Pension' ? 'selected' : ''}>Pension</option>
+                            <option value="Business" ${i.type === 'Business' ? 'selected' : ''}>Business</option>
+                            <option value="Other" ${i.type === 'Other' ? 'selected' : ''}>Other</option>
+                        </select>
+                        <select value="${i.person || ''}" onchange="app.updateIncome(${i.id}, 'person', this.value)" class="px-3 py-2 border rounded">
+                            <option value="">Select person...</option>
+                            ${this.familyMembers.map(m => `
+                                <option value="${m.name}" ${i.person === m.name ? 'selected' : ''}>${m.name || 'Unnamed Member'}</option>
+                            `).join('')}
+                        </select>
+                        <input type="number" value="${i.amount}" onchange="app.updateIncome(${i.id}, 'amount', parseFloat(this.value)||0)" placeholder="Annual Amount" class="px-3 py-2 border rounded">
+                    </div>
+                    <button onclick="app.removeIncome(${i.id})" class="text-red-600">🗑️</button>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
 
     renderExpenses() {
         return `
