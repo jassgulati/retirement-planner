@@ -11,7 +11,6 @@ class RetirementApp {
         this.familyMembers = [{ 
             id: 1, 
             name: '', 
-            dateOfBirth: '',
             birthYear: new Date().getFullYear() - 30,
             relation: 'Self',
             currentSalary: 0,
@@ -44,7 +43,6 @@ class RetirementApp {
                 this.familyMembers = data.familyMembers || [{ 
                     id: 1, 
                     name: '', 
-                    dateOfBirth: '',
                     birthYear: new Date().getFullYear() - 30,
                     relation: 'Self',
                     currentSalary: 0,
@@ -94,7 +92,6 @@ class RetirementApp {
         this.familyMembers.push({ 
             id: Date.now(), 
             name: '', 
-            dateOfBirth: '',
             birthYear: new Date().getFullYear() - 30,
             relation: 'Spouse',
             currentSalary: 0,
@@ -110,16 +107,6 @@ class RetirementApp {
             m.id === id ? { ...m, [field]: value } : m
         );
         this.saveData();
-    }
-
-    updateBirthYear(id, dateOfBirth) {
-        if (dateOfBirth) {
-            const birthYear = new Date(dateOfBirth).getFullYear();
-            this.familyMembers = this.familyMembers.map(m => 
-                m.id === id ? { ...m, birthYear, dateOfBirth } : m
-            );
-            this.saveData();
-        }
     }
 
     removeFamilyMember(id) {
@@ -299,37 +286,26 @@ class RetirementApp {
                     <button onclick="app.addFamilyMember()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">+ Add Member</button>
                 </div>
                 ${this.familyMembers.map(m => {
-                    const birthDate = m.dateOfBirth || '';
-                    
-                    let calculatedAge = currentYear - (m.birthYear || currentYear);
-                    if (m.dateOfBirth) {
-                        const birth = new Date(m.dateOfBirth);
-                        const today = new Date();
-                        calculatedAge = today.getFullYear() - birth.getFullYear();
-                        const monthDiff = today.getMonth() - birth.getMonth();
-                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                            calculatedAge--;
-                        }
-                    }
-                    
+                    const age = currentYear - (m.birthYear || currentYear);
                     return `
                         <div class="bg-gray-50 p-6 rounded-lg mb-4">
-                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                                <div>
+                            <div class="flex gap-4 mb-4">
+                                <div class="flex-1">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
                                     <input type="text" value="${m.name || ''}" 
                                         onchange="app.updateFamilyMember(${m.id}, 'name', this.value)" 
                                         placeholder="Enter name" 
                                         class="w-full px-3 py-2 border rounded">
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                                    <input type="date" value="${birthDate}" 
-                                        onchange="app.updateBirthYear(${m.id}, this.value)" 
+                                <div class="flex-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Birth Year</label>
+                                    <input type="number" value="${m.birthYear || currentYear - 30}" 
+                                        onchange="app.updateFamilyMember(${m.id}, 'birthYear', parseInt(this.value)||${currentYear})" 
+                                        placeholder="1990" 
                                         class="w-full px-3 py-2 border rounded">
-                                    <p class="text-xs text-gray-500 mt-1">Age: ${calculatedAge}</p>
+                                    <p class="text-xs text-gray-500 mt-1">Current age: ${age}</p>
                                 </div>
-                                <div>
+                                <div class="flex-1">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Relation</label>
                                     <select 
                                         onchange="app.updateFamilyMember(${m.id}, 'relation', this.value)" 
@@ -340,19 +316,15 @@ class RetirementApp {
                                         <option value="Other" ${m.relation === 'Other' ? 'selected' : ''}>Other</option>
                                     </select>
                                 </div>
-                                <div class="flex items-end">
-                                    ${this.familyMembers.length > 1 ? `
-                                        <button onclick="app.removeFamilyMember(${m.id})" class="w-full bg-red-50 text-red-600 px-3 py-2 rounded hover:bg-red-100">
-                                            Remove
-                                        </button>
-                                    ` : '<div></div>'}
-                                </div>
+                                ${this.familyMembers.length > 1 ? `
+                                    <button onclick="app.removeFamilyMember(${m.id})" class="text-red-600 self-start mt-6">🗑️</button>
+                                ` : ''}
                             </div>
                             
                             ${m.relation === 'Self' || m.relation === 'Spouse' ? `
                                 <div class="border-t pt-4 mt-4">
                                     <h3 class="font-semibold text-gray-700 mb-3">Work & Retirement Planning</h3>
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="grid grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Current Annual Salary ($)</label>
                                             <input type="number" value="${m.currentSalary || 0}" 
@@ -366,7 +338,6 @@ class RetirementApp {
                                                 onchange="app.updateFamilyMember(${m.id}, 'yearStartedWorking', parseInt(this.value)||null)" 
                                                 placeholder="2005" 
                                                 class="w-full px-3 py-2 border rounded">
-                                            ${m.yearStartedWorking ? `<p class="text-xs text-gray-500 mt-1">Years worked: ${currentYear - m.yearStartedWorking}</p>` : ''}
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Desired Retirement Age</label>
@@ -387,16 +358,6 @@ class RetirementApp {
                                             <p class="text-xs text-gray-500 mt-1">Start collecting: ${(m.birthYear || currentYear) + (m.ssCollectionAge || 67)}</p>
                                         </div>
                                     </div>
-                                    ${m.ssCollectionAge && m.ssCollectionAge !== 67 ? `
-                                        <div class="mt-3 p-3 ${m.ssCollectionAge < 67 ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'} border rounded">
-                                            <p class="text-sm ${m.ssCollectionAge < 67 ? 'text-yellow-800' : 'text-green-800'}">
-                                                ${m.ssCollectionAge < 67 
-                                                    ? `⚠️ Collecting before age 67 will reduce your monthly benefit by approximately ${Math.round(((67 - m.ssCollectionAge) * 12) * 0.00555556 * 100)}%` 
-                                                    : `✓ Collecting after age 67 will increase your monthly benefit by approximately ${Math.round(((m.ssCollectionAge - 67) * 12) * 0.00666667 * 100)}%`
-                                                }
-                                            </p>
-                                        </div>
-                                    ` : ''}
                                 </div>
                             ` : ''}
                         </div>
@@ -517,8 +478,7 @@ class RetirementApp {
                 
                 <div class="bg-gray-50 p-6 rounded-lg">
                     <h3 class="text-lg font-semibold mb-2">About These Projections</h3>
-                    <p class="text-sm text-gray-600 mb-2">Social Security estimates are based on current salary and assume it represents your career average. Actual benefits may vary based on your complete earnings history.</p>
-                    <p class="text-sm text-gray-600"><strong>Important:</strong> These are estimates only. For accurate benefit information, check your official Social Security statement at <a href="https://www.ssa.gov/myaccount" target="_blank" class="text-blue-600 underline">ssa.gov/myaccount</a></p>
+                    <p class="text-sm text-gray-600">Social Security estimates are based on current salary. These are estimates only - check your official SSA statement at ssa.gov/myaccount for accurate information.</p>
                 </div>
             </div>
         `;
