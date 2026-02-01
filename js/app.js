@@ -22,6 +22,7 @@ class RetirementApp {
         this.expenses = [];
         this.dataUnsubscribe = null;
 
+        // Listen for auth changes
         onAuthChange((user) => {
             if (user) {
                 this.currentUser = user;
@@ -88,6 +89,7 @@ class RetirementApp {
         await logout();
     }
 
+    // Family Members
     addFamilyMember() {
         this.familyMembers.push({ 
             id: Date.now(), 
@@ -114,6 +116,7 @@ class RetirementApp {
         this.saveData();
     }
 
+    // Income
     addIncome() {
         this.incomes.push({ id: Date.now(), type: 'Salary', person: '', amount: 0 });
         this.saveData();
@@ -131,6 +134,7 @@ class RetirementApp {
         this.saveData();
     }
 
+    // Expenses
     addExpense() {
         this.expenses.push({ id: Date.now(), category: 'Living', name: '', amount: 0, frequency: 'Monthly' });
         this.saveData();
@@ -148,6 +152,7 @@ class RetirementApp {
         this.saveData();
     }
 
+    // UI Methods
     switchTab(tabId) {
         this.currentTab = tabId;
         this.render();
@@ -307,13 +312,13 @@ class RetirementApp {
                                 </div>
                                 <div class="flex-1">
                                     <label class="block text-sm font-medium text-gray-700 mb-1">Relation</label>
-                                    <select 
+                                    <select value="${m.relation}" 
                                         onchange="app.updateFamilyMember(${m.id}, 'relation', this.value)" 
                                         class="w-full px-3 py-2 border rounded">
-                                        <option value="Self" ${m.relation === 'Self' ? 'selected' : ''}>Self</option>
-                                        <option value="Spouse" ${m.relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
-                                        <option value="Child" ${m.relation === 'Child' ? 'selected' : ''}>Child</option>
-                                        <option value="Other" ${m.relation === 'Other' ? 'selected' : ''}>Other</option>
+                                        <option ${m.relation === 'Self' ? 'selected' : ''}>Self</option>
+                                        <option ${m.relation === 'Spouse' ? 'selected' : ''}>Spouse</option>
+                                        <option ${m.relation === 'Child' ? 'selected' : ''}>Child</option>
+                                        <option ${m.relation === 'Other' ? 'selected' : ''}>Other</option>
                                     </select>
                                 </div>
                                 ${this.familyMembers.length > 1 ? `
@@ -419,12 +424,14 @@ class RetirementApp {
     }
 
     renderProjection(income, expenses, surplus) {
+        // Calculate Social Security
         const ssData = calculateHouseholdSS(this.familyMembers);
         
         return `
             <div>
                 <h2 class="text-2xl font-bold mb-6">Financial Projection</h2>
                 
+                <!-- Current Annual Summary -->
                 <div class="grid grid-cols-3 gap-4 mb-8">
                     <div class="bg-blue-50 p-6 rounded-lg">
                         <p class="text-sm text-gray-600">Total Annual Income</p>
@@ -440,8 +447,9 @@ class RetirementApp {
                     </div>
                 </div>
                 
+                <!-- Social Security Projections -->
                 <div class="bg-white border-2 border-blue-200 rounded-lg p-6 mb-8">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Social Security Projections</h3>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">💰 Social Security Projections</h3>
                     ${ssData.members.length > 0 ? `
                         <div class="space-y-4">
                             ${ssData.members.map(member => `
@@ -477,12 +485,14 @@ class RetirementApp {
                 </div>
                 
                 <div class="bg-gray-50 p-6 rounded-lg">
-                    <h3 class="text-lg font-semibold mb-2">About These Projections</h3>
-                    <p class="text-sm text-gray-600">Social Security estimates are based on current salary. These are estimates only - check your official SSA statement at ssa.gov/myaccount for accurate information.</p>
+                    <h3 class="text-lg font-semibold mb-2">📋 About These Projections</h3>
+                    <p class="text-sm text-gray-600 mb-2">Social Security estimates are based on current salary and assume it represents your career average. Actual benefits may vary based on your complete earnings history.</p>
+                    <p class="text-sm text-gray-600"><strong>Important:</strong> These are estimates only. For accurate benefit information, check your official Social Security statement at <a href="https://www.ssa.gov/myaccount" target="_blank" class="text-blue-600 underline">ssa.gov/myaccount</a></p>
                 </div>
             </div>
         `;
     }
 }
 
+// Initialize app
 window.app = new RetirementApp();
