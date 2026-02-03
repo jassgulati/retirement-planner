@@ -1,14 +1,14 @@
 // Firebase Configuration
-export const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DATABASE_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBR-Iz3V143KD4eQL_DHW9HvyeRIumlfxY",
+  authDomain: "retirement-planning-2ea8c.firebaseapp.com",
+  projectId: "retirement-planning-2ea8c",
+  storageBucket: "retirement-planning-2ea8c.firebasestorage.app",
+  messagingSenderId: "638834364301",
+  appId: "1:638834364301:web:dd5e987f4bc1ff511437c4",
+  measurementId: "G-C300GP56C2"
 };
-
 // Initialize Firebase
 export function initializeFirebase() {
     if (!firebase.apps.length) {
