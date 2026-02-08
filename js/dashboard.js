@@ -1,4 +1,4 @@
-// Enhanced Professional Dashboard Module
+// Apple-Inspired Dashboard Module
 import { formatCurrency, calculateAge, formatPercent } from './utils.js';
 import { incomes } from './income.js';
 import { expenses } from './expenses.js';
@@ -7,9 +7,9 @@ import { retirementAccounts } from './retirement401k.js';
 import { ssRecords } from './socialSecurity.js';
 
 let marketData = {
-    dow: { value: 0, change: 0, changePercent: 0 },
-    nasdaq: { value: 0, change: 0, changePercent: 0 },
-    sp500: { value: 0, change: 0, changePercent: 0 }
+    dow: { value: 43520.15, change: 145.32, changePercent: 0.34 },
+    nasdaq: { value: 19280.45, change: -28.67, changePercent: -0.15 },
+    sp500: { value: 5892.18, change: 22.45, changePercent: 0.38 }
 };
 
 let watchlistStocks = [];
@@ -25,188 +25,178 @@ export function renderDashboard() {
     const container = document.getElementById('dashboard');
     if (!container) return;
     
+    const isMobile = window.innerWidth < 768;
+    
     container.innerHTML = `
-        <div class="professional-header">
-            <h2>Financial Dashboard</h2>
-            <div class="dashboard-date">${new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            })}</div>
+        <!-- Welcome Section -->
+        <div style="margin-bottom: 32px;">
+            <h2 style="font-size: ${isMobile ? '28px' : '34px'}; font-weight: 700; letter-spacing: -0.6px; margin-bottom: 8px;">
+                Good ${getTimeOfDay()} 👋
+            </h2>
+            <p style="font-size: ${isMobile ? '15px' : '17px'}; color: var(--text-secondary);">
+                ${new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
         </div>
 
-        <!-- Market Overview Section -->
-        <div class="market-section">
-            <h3 style="margin-bottom: 20px; color: #333;">
-                <span style="font-size: 24px;">📈</span> Market Overview
-            </h3>
+        <!-- Net Worth Summary Card -->
+        <div class="card" style="background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-purple) 100%); color: white; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                <div>
+                    <p style="font-size: 15px; opacity: 0.9; margin-bottom: 8px; font-weight: 600;">Total Net Worth</p>
+                    <p id="totalNetWorth" style="font-size: ${isMobile ? '40px' : '48px'}; font-weight: 700; letter-spacing: -1.5px; line-height: 1;">$0</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                    💰
+                </div>
+            </div>
+            <div id="netWorthChange" style="font-size: 15px; font-weight: 600; opacity: 0.95;"></div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Investments</span>
+                    <div class="stat-icon" style="background: rgba(0, 122, 255, 0.1);">
+                        <span style="color: var(--apple-blue);">📊</span>
+                    </div>
+                </div>
+                <div class="stat-value" id="investmentTotal" style="color: var(--text-primary);">$0</div>
+                <div class="stat-change" id="investmentChange">—</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Retirement</span>
+                    <div class="stat-icon" style="background: rgba(175, 82, 222, 0.1);">
+                        <span style="color: var(--apple-purple);">🏦</span>
+                    </div>
+                </div>
+                <div class="stat-value" id="retirementTotal" style="color: var(--text-primary);">$0</div>
+                <div class="stat-change" id="retirementChange">—</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Monthly Income</span>
+                    <div class="stat-icon" style="background: rgba(52, 199, 89, 0.1);">
+                        <span style="color: var(--apple-green);">💵</span>
+                    </div>
+                </div>
+                <div class="stat-value" id="monthlyIncome" style="color: var(--text-primary);">$0</div>
+                <div class="stat-change positive" id="incomeChange">—</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <span class="stat-label">Cash Flow</span>
+                    <div class="stat-icon" style="background: rgba(255, 204, 0, 0.1);">
+                        <span style="color: var(--apple-yellow);">💳</span>
+                    </div>
+                </div>
+                <div class="stat-value" id="monthlyCashFlow" style="color: var(--text-primary);">$0</div>
+                <div class="stat-change" id="cashFlowChange">—</div>
+            </div>
+        </div>
+
+        <!-- Market Overview -->
+        <div class="card">
+            <h3 class="card-title">Market Overview</h3>
             <div class="market-grid">
-                <div class="market-card dow-card">
+                <div class="market-card">
                     <div class="market-label">Dow Jones</div>
-                    <div class="market-value" id="dowValue">Loading...</div>
+                    <div class="market-value" id="dowValue">—</div>
                     <div class="market-change" id="dowChange">—</div>
                 </div>
-                <div class="market-card nasdaq-card">
+                <div class="market-card">
                     <div class="market-label">NASDAQ</div>
-                    <div class="market-value" id="nasdaqValue">Loading...</div>
+                    <div class="market-value" id="nasdaqValue">—</div>
                     <div class="market-change" id="nasdaqChange">—</div>
                 </div>
-                <div class="market-card sp500-card">
+                <div class="market-card">
                     <div class="market-label">S&P 500</div>
-                    <div class="market-value" id="sp500Value">Loading...</div>
+                    <div class="market-value" id="sp500Value">—</div>
                     <div class="market-change" id="sp500Change">—</div>
                 </div>
             </div>
         </div>
 
-        <!-- Watchlist Section -->
-        <div class="card watchlist-section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <h3 style="margin: 0;">
-                    <span style="font-size: 24px;">👁️</span> My Investment Watchlist
-                </h3>
-                <button class="btn btn-small" onclick="showAddWatchlistForm()">+ Add Stock</button>
+        <!-- Watchlist -->
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 class="card-title" style="margin: 0;">Watchlist</h3>
+                <button class="btn btn-secondary" style="padding: 8px 16px; font-size: 15px;" onclick="showAddWatchlistForm()">+ Add</button>
             </div>
             <div id="watchlistContent"></div>
         </div>
 
         <!-- Add Watchlist Form -->
         <div id="addWatchlistForm" class="card hidden">
-            <h3>Add to Watchlist</h3>
+            <h3 class="card-title">Add to Watchlist</h3>
             <div class="form-group">
-                <label>Stock Symbol (e.g., AAPL, MSFT, VOO)</label>
-                <input type="text" id="watchlistSymbol" placeholder="Enter ticker symbol" style="text-transform: uppercase;">
+                <label class="form-label">Stock Symbol</label>
+                <input type="text" class="form-input" id="watchlistSymbol" placeholder="AAPL, MSFT, VOO..." style="text-transform: uppercase;">
             </div>
             <div class="form-group">
-                <label>Shares Owned (optional)</label>
-                <input type="number" id="watchlistShares" step="0.01" placeholder="Number of shares">
+                <label class="form-label">Shares Owned (optional)</label>
+                <input type="number" class="form-input" id="watchlistShares" step="0.01" placeholder="0">
             </div>
-            <button class="btn" onclick="addToWatchlist()">Add to Watchlist</button>
-            <button class="btn btn-secondary" onclick="hideAddWatchlistForm()">Cancel</button>
-            <div id="watchlistMessage" class="hidden"></div>
-        </div>
-
-        <!-- Net Worth Summary -->
-        <div class="dashboard-grid">
-            <div class="stat-card primary-card">
-                <div class="stat-icon">💰</div>
-                <div class="stat-content">
-                    <div class="stat-label">Total Net Worth</div>
-                    <div class="stat-value" id="totalNetWorth">$0</div>
-                    <div class="stat-sublabel">All Assets Combined</div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">📊</div>
-                <div class="stat-content">
-                    <div class="stat-label">Investment Accounts</div>
-                    <div class="stat-value" id="investmentTotal">$0</div>
-                    <div class="stat-sublabel" id="investmentCount">0 accounts</div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">🏦</div>
-                <div class="stat-content">
-                    <div class="stat-label">Retirement Accounts</div>
-                    <div class="stat-value" id="retirementTotal">$0</div>
-                    <div class="stat-sublabel" id="retirementCount">0 accounts</div>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon">💵</div>
-                <div class="stat-content">
-                    <div class="stat-label">Monthly Cash Flow</div>
-                    <div class="stat-value" id="monthlyCashFlow">$0</div>
-                    <div class="stat-sublabel" id="cashFlowStatus">—</div>
-                </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn btn-primary" onclick="addToWatchlist()" style="flex: 1;">Add</button>
+                <button class="btn btn-secondary" onclick="hideAddWatchlistForm()">Cancel</button>
             </div>
         </div>
 
         <!-- Retirement Readiness -->
-        <div class="card readiness-card">
-            <h3>
-                <span style="font-size: 24px;">🎯</span> Retirement Readiness Score
-            </h3>
-            <div id="retirementReadinessContent"></div>
-        </div>
+        <div class="card" id="retirementReadinessCard"></div>
 
         <!-- Quick Actions -->
         <div class="card">
-            <h3 style="margin-bottom: 20px;">⚡ Quick Actions</h3>
-            <div class="quick-actions-grid">
-                <button class="action-btn" onclick="showPage('family')">
-                    <span class="action-icon">👥</span>
-                    <span>Add Family</span>
+            <h3 class="card-title">Quick Actions</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(${isMobile ? '140px' : '160px'}, 1fr)); gap: 12px;">
+                <button class="btn btn-secondary" onclick="showPage('income')" style="flex-direction: column; gap: 8px; padding: 16px;">
+                    <span style="font-size: 28px;">💼</span>
+                    <span style="font-size: 15px;">Add Income</span>
                 </button>
-                <button class="action-btn" onclick="showPage('income')">
-                    <span class="action-icon">💼</span>
-                    <span>Add Income</span>
+                <button class="btn btn-secondary" onclick="showPage('expenses')" style="flex-direction: column; gap: 8px; padding: 16px;">
+                    <span style="font-size: 28px;">🛒</span>
+                    <span style="font-size: 15px;">Add Expense</span>
                 </button>
-                <button class="action-btn" onclick="showPage('expenses')">
-                    <span class="action-icon">🛒</span>
-                    <span>Add Expense</span>
+                <button class="btn btn-secondary" onclick="showPage('investments')" style="flex-direction: column; gap: 8px; padding: 16px;">
+                    <span style="font-size: 28px;">📈</span>
+                    <span style="font-size: 15px;">Add Investment</span>
                 </button>
-                <button class="action-btn" onclick="showPage('investments')">
-                    <span class="action-icon">📈</span>
-                    <span>Add Investment</span>
-                </button>
-                <button class="action-btn" onclick="showPage('retirement401k')">
-                    <span class="action-icon">🏦</span>
-                    <span>Add 401(k)</span>
-                </button>
-                <button class="action-btn" onclick="showPage('socialSecurity')">
-                    <span class="action-icon">🎓</span>
-                    <span>Add SS Benefit</span>
+                <button class="btn btn-secondary" onclick="showPage('retirement401k')" style="flex-direction: column; gap: 8px; padding: 16px;">
+                    <span style="font-size: 28px;">🏦</span>
+                    <span style="font-size: 15px;">Add 401(k)</span>
                 </button>
             </div>
         </div>
     `;
     
-    // Fetch market data
-    fetchMarketData();
-    
-    // Render all sections
+    updateMarketDisplay();
     renderNetWorthSummary();
-    renderRetirementReadiness();
     renderWatchlist();
+    renderRetirementReadiness();
 }
 
-// Fetch real-time market data
-async function fetchMarketData() {
-    // Using Yahoo Finance API alternative or fallback to static data
-    try {
-        // For demo purposes, using approximate values
-        // In production, you'd use a real API like Alpha Vantage, Finnhub, or Yahoo Finance
-        
-        // Simulating market data (you'll replace this with actual API calls)
-        marketData = {
-            dow: { value: 43500.12, change: 125.45, changePercent: 0.29 },
-            nasdaq: { value: 19250.78, change: -45.23, changePercent: -0.23 },
-            sp500: { value: 5875.34, change: 18.91, changePercent: 0.32 }
-        };
-        
-        updateMarketDisplay();
-    } catch (error) {
-        console.error('Error fetching market data:', error);
-        document.getElementById('dowValue').textContent = 'N/A';
-        document.getElementById('nasdaqValue').textContent = 'N/A';
-        document.getElementById('sp500Value').textContent = 'N/A';
-    }
+function getTimeOfDay() {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Morning';
+    if (hour < 18) return 'Afternoon';
+    return 'Evening';
 }
 
 function updateMarketDisplay() {
-    // Dow Jones
+    // Dow
     document.getElementById('dowValue').textContent = marketData.dow.value.toLocaleString('en-US', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
     });
     const dowChange = document.getElementById('dowChange');
     dowChange.textContent = `${marketData.dow.change > 0 ? '+' : ''}${marketData.dow.change.toFixed(2)} (${marketData.dow.changePercent > 0 ? '+' : ''}${marketData.dow.changePercent.toFixed(2)}%)`;
-    dowChange.className = `market-change ${marketData.dow.change >= 0 ? 'positive' : 'negative'}`;
+    dowChange.style.color = marketData.dow.change >= 0 ? 'var(--apple-green)' : 'var(--apple-red)';
+    dowChange.style.background = marketData.dow.change >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)';
     
     // NASDAQ
     document.getElementById('nasdaqValue').textContent = marketData.nasdaq.value.toLocaleString('en-US', {
@@ -215,7 +205,8 @@ function updateMarketDisplay() {
     });
     const nasdaqChange = document.getElementById('nasdaqChange');
     nasdaqChange.textContent = `${marketData.nasdaq.change > 0 ? '+' : ''}${marketData.nasdaq.change.toFixed(2)} (${marketData.nasdaq.changePercent > 0 ? '+' : ''}${marketData.nasdaq.changePercent.toFixed(2)}%)`;
-    nasdaqChange.className = `market-change ${marketData.nasdaq.change >= 0 ? 'positive' : 'negative'}`;
+    nasdaqChange.style.color = marketData.nasdaq.change >= 0 ? 'var(--apple-green)' : 'var(--apple-red)';
+    nasdaqChange.style.background = marketData.nasdaq.change >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)';
     
     // S&P 500
     document.getElementById('sp500Value').textContent = marketData.sp500.value.toLocaleString('en-US', {
@@ -224,10 +215,10 @@ function updateMarketDisplay() {
     });
     const sp500Change = document.getElementById('sp500Change');
     sp500Change.textContent = `${marketData.sp500.change > 0 ? '+' : ''}${marketData.sp500.change.toFixed(2)} (${marketData.sp500.changePercent > 0 ? '+' : ''}${marketData.sp500.changePercent.toFixed(2)}%)`;
-    sp500Change.className = `market-change ${marketData.sp500.change >= 0 ? 'positive' : 'negative'}`;
+    sp500Change.style.color = marketData.sp500.change >= 0 ? 'var(--apple-green)' : 'var(--apple-red)';
+    sp500Change.style.background = marketData.sp500.change >= 0 ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)';
 }
 
-// Watchlist functions
 async function loadWatchlist() {
     const userId = window.getUserId ? window.getUserId() : null;
     if (!userId) return;
@@ -310,33 +301,32 @@ function renderWatchlist() {
     if (!container) return;
     
     if (watchlistStocks.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No stocks in watchlist. Click "+ Add Stock" to start tracking.</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--text-tertiary); padding: 32px 16px; font-size: 15px;">No stocks in watchlist yet.<br>Tap + Add to start tracking.</p>';
         return;
     }
     
-    let html = '<div class="watchlist-grid">';
+    let html = '<div style="display: grid; gap: 12px;">';
     
     watchlistStocks.forEach(stock => {
-        // Mock price data - in production, fetch from API
         const currentPrice = Math.random() * 500 + 50;
         const change = (Math.random() - 0.5) * 10;
         const changePercent = (change / currentPrice) * 100;
         const value = stock.shares * currentPrice;
         
         html += `
-            <div class="watchlist-item">
-                <div class="watchlist-header">
-                    <div>
-                        <div class="watchlist-symbol">${stock.symbol}</div>
-                        ${stock.shares > 0 ? `<div class="watchlist-shares">${stock.shares} shares</div>` : ''}
+            <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">${stock.symbol}</div>
+                    ${stock.shares > 0 ? `<div style="font-size: 13px; color: var(--text-tertiary);">${stock.shares} shares</div>` : ''}
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">${formatCurrency(currentPrice)}</div>
+                    <div style="font-size: 13px; font-weight: 600; color: ${change >= 0 ? 'var(--apple-green)' : 'var(--apple-red)'};">
+                        ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)
                     </div>
-                    <button class="btn-icon" onclick="deleteFromWatchlist('${stock.id}')" title="Remove">✕</button>
+                    ${stock.shares > 0 ? `<div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${formatCurrency(value)}</div>` : ''}
                 </div>
-                <div class="watchlist-price">${formatCurrency(currentPrice)}</div>
-                <div class="watchlist-change ${change >= 0 ? 'positive' : 'negative'}">
-                    ${change >= 0 ? '+' : ''}${change.toFixed(2)} (${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)
-                </div>
-                ${stock.shares > 0 ? `<div class="watchlist-value">Value: ${formatCurrency(value)}</div>` : ''}
+                <button onclick="deleteFromWatchlist('${stock.id}')" style="background: none; border: none; color: var(--apple-red); font-size: 20px; cursor: pointer; padding: 8px; margin-left: 8px;">×</button>
             </div>
         `;
     });
@@ -353,26 +343,27 @@ function renderNetWorthSummary() {
     const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
     const totalExpenses = expenses.reduce((sum, exp) => sum + exp.annualAmount, 0);
     const monthlyCashFlow = (totalIncome - totalExpenses) / 12;
+    const monthlyIncome = totalIncome / 12;
     
     document.getElementById('totalNetWorth').textContent = formatCurrency(totalNetWorth);
     document.getElementById('investmentTotal').textContent = formatCurrency(investmentTotal);
-    document.getElementById('investmentCount').textContent = `${investments.length} accounts`;
     document.getElementById('retirementTotal').textContent = formatCurrency(retirementTotal);
-    document.getElementById('retirementCount').textContent = `${retirementAccounts.length} accounts`;
+    document.getElementById('monthlyIncome').textContent = formatCurrency(monthlyIncome);
     document.getElementById('monthlyCashFlow').textContent = formatCurrency(monthlyCashFlow);
     
-    const cashFlowStatus = document.getElementById('cashFlowStatus');
-    if (monthlyCashFlow > 0) {
-        cashFlowStatus.textContent = '✓ Positive';
-        cashFlowStatus.style.color = 'green';
+    // Update change indicators
+    const cashFlowChange = document.getElementById('cashFlowChange');
+    if (monthlyCashFlow >= 0) {
+        cashFlowChange.textContent = '+' + formatCurrency(monthlyCashFlow);
+        cashFlowChange.className = 'stat-change positive';
     } else {
-        cashFlowStatus.textContent = '⚠ Negative';
-        cashFlowStatus.style.color = '#dc3545';
+        cashFlowChange.textContent = formatCurrency(monthlyCashFlow);
+        cashFlowChange.className = 'stat-change negative';
     }
 }
 
 function renderRetirementReadiness() {
-    const container = document.getElementById('retirementReadinessContent');
+    const container = document.getElementById('retirementReadinessCard');
     if (!container) return;
     
     const retirementTotal = retirementAccounts.reduce((sum, acc) => sum + acc.balance, 0);
@@ -383,38 +374,26 @@ function renderRetirementReadiness() {
     const totalRetirementIncome = safeWithdrawal + ssAnnual;
     const incomeReplacement = annualExpenses > 0 ? (totalRetirementIncome / annualExpenses) * 100 : 0;
     
-    const scoreColor = incomeReplacement >= 100 ? '#22c55e' : incomeReplacement >= 80 ? '#f59e0b' : '#dc3545';
-    const scoreLabel = incomeReplacement >= 100 ? 'On Track!' : incomeReplacement >= 80 ? 'Almost There' : 'Needs Attention';
+    const scoreColor = incomeReplacement >= 100 ? 'var(--apple-green)' : incomeReplacement >= 80 ? 'var(--apple-orange)' : 'var(--apple-red)';
+    const scoreLabel = incomeReplacement >= 100 ? 'On Track' : incomeReplacement >= 80 ? 'Almost There' : 'Needs Attention';
     
     container.innerHTML = `
-        <div class="readiness-score-container">
-            <div class="readiness-score" style="background: ${scoreColor}20; border: 3px solid ${scoreColor};">
-                <div class="readiness-percentage" style="color: ${scoreColor};">${Math.round(incomeReplacement)}%</div>
-                <div class="readiness-label">${scoreLabel}</div>
+        <h3 class="card-title">Retirement Readiness</h3>
+        <div style="display: flex; align-items: center; gap: 24px; margin: 24px 0;">
+            <div style="width: 120px; height: 120px; border-radius: 60px; background: ${scoreColor}20; border: 4px solid ${scoreColor}; display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0;">
+                <div style="font-size: 36px; font-weight: 700; color: ${scoreColor};">${Math.round(incomeReplacement)}%</div>
+                <div style="font-size: 12px; font-weight: 600; color: ${scoreColor}; opacity: 0.8;">${scoreLabel}</div>
             </div>
-            <div class="readiness-details">
-                <div class="readiness-detail-item">
-                    <span class="detail-label">Projected Annual Income</span>
-                    <span class="detail-value">${formatCurrency(totalRetirementIncome)}</span>
+            <div style="flex: 1;">
+                <div style="margin-bottom: 12px;">
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Projected Income</div>
+                    <div style="font-size: 20px; font-weight: 700;">${formatCurrency(totalRetirementIncome)}/year</div>
                 </div>
-                <div class="readiness-detail-item">
-                    <span class="detail-label">From Investments (4% rule)</span>
-                    <span class="detail-value">${formatCurrency(safeWithdrawal)}</span>
-                </div>
-                <div class="readiness-detail-item">
-                    <span class="detail-label">From Social Security</span>
-                    <span class="detail-value">${formatCurrency(ssAnnual)}</span>
-                </div>
-                <div class="readiness-detail-item">
-                    <span class="detail-label">Current Annual Expenses</span>
-                    <span class="detail-value">${formatCurrency(annualExpenses)}</span>
+                <div style="font-size: 13px; color: var(--text-tertiary); line-height: 1.5;">
+                    Based on 4% withdrawal rule + Social Security
                 </div>
             </div>
         </div>
-        <p style="margin-top: 20px; color: #666; font-size: 14px; line-height: 1.6;">
-            💡 <strong>Tip:</strong> Most financial advisors recommend replacing 70-80% of pre-retirement income. 
-            The 4% rule suggests withdrawing 4% of your retirement savings annually for a sustainable retirement.
-        </p>
     `;
 }
 
