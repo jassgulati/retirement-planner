@@ -1,4 +1,4 @@
-// Main Application File - Apple Design
+// Main Application File - WORKING VERSION
 import { renderDashboard } from './dashboard.js';
 import { renderFamilyPage } from './familyMembers.js';
 import { renderIncomePage } from './income.js';
@@ -8,19 +8,17 @@ import { renderRetirement401kPage } from './retirement401k.js';
 import { renderSocialSecurityPage } from './socialSecurity.js';
 import { renderTaxPage } from './taxProjections.js';
 
-// Page navigation with mobile support
+// Page navigation - MUST be global for onclick to work
 window.showPage = function(pageName) {
+    console.log('Navigating to:', pageName);
+    
     // Hide all pages
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
     
-    // Remove active class from all nav items (desktop and mobile)
-    document.querySelectorAll('.nav-item').forEach(tab => {
-        tab.classList.remove('active');
-    });
-    
-    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+    // Remove active from all nav items
+    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
         item.classList.remove('active');
     });
     
@@ -28,98 +26,67 @@ window.showPage = function(pageName) {
     const page = document.getElementById(pageName);
     if (page) {
         page.classList.add('active');
-        
-        // Scroll to top when changing pages
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
-    // Set active desktop tab
-    const desktopTabs = document.querySelectorAll('.nav-item');
-    desktopTabs.forEach(tab => {
-        const tabText = tab.textContent.toLowerCase();
-        if ((pageName === 'dashboard' && tabText.includes('overview')) ||
-            (pageName === 'family' && tabText.includes('family')) ||
-            (pageName === 'income' && tabText.includes('income')) ||
-            (pageName === 'expenses' && tabText.includes('expenses')) ||
-            (pageName === 'investments' && tabText.includes('investments')) ||
-            (pageName === 'retirement401k' && tabText.includes('retirement')) ||
-            (pageName === 'socialSecurity' && tabText.includes('social')) ||
-            (pageName === 'taxes' && tabText.includes('taxes'))) {
-            tab.classList.add('active');
-        }
-    });
-    
-    // Set active mobile nav
-    const mobileItems = document.querySelectorAll('.mobile-nav-item');
-    mobileItems.forEach(item => {
-        if (item.getAttribute('data-page') === pageName) {
+    // Set active nav item
+    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+        const itemText = item.textContent.toLowerCase();
+        const dataPage = item.getAttribute('data-page');
+        
+        if (dataPage === pageName || 
+            (pageName === 'dashboard' && (itemText.includes('overview') || itemText.includes('dashboard'))) ||
+            (pageName === 'family' && itemText.includes('family')) ||
+            (pageName === 'income' && itemText.includes('income')) ||
+            (pageName === 'expenses' && (itemText.includes('expenses') || itemText.includes('spend'))) ||
+            (pageName === 'investments' && (itemText.includes('invest'))) ||
+            (pageName === 'retirement401k' && (itemText.includes('retirement') || itemText.includes('retire'))) ||
+            (pageName === 'socialSecurity' && itemText.includes('social')) ||
+            (pageName === 'taxes' && itemText.includes('tax'))) {
             item.classList.add('active');
         }
     });
     
-    // Render the appropriate page content
-    switch(pageName) {
-        case 'dashboard':
-            renderDashboard();
-            break;
-        case 'family':
-            renderFamilyPage();
-            break;
-        case 'income':
-            renderIncomePage();
-            break;
-        case 'expenses':
-            renderExpensesPage();
-            break;
-        case 'investments':
-            renderInvestmentsPage();
-            break;
-        case 'retirement401k':
-            renderRetirement401kPage();
-            break;
-        case 'socialSecurity':
-            renderSocialSecurityPage();
-            break;
-        case 'taxes':
-            renderTaxPage();
-            break;
+    // Render page content
+    try {
+        switch(pageName) {
+            case 'dashboard':
+                renderDashboard();
+                break;
+            case 'family':
+                renderFamilyPage();
+                break;
+            case 'income':
+                renderIncomePage();
+                break;
+            case 'expenses':
+                renderExpensesPage();
+                break;
+            case 'investments':
+                renderInvestmentsPage();
+                break;
+            case 'retirement401k':
+                renderRetirement401kPage();
+                break;
+            case 'socialSecurity':
+                renderSocialSecurityPage();
+                break;
+            case 'taxes':
+                renderTaxPage();
+                break;
+            default:
+                console.error('Unknown page:', pageName);
+        }
+    } catch (error) {
+        console.error('Error rendering page:', pageName, error);
     }
 };
 
 // Initialize app when user logs in
 window.addEventListener('userLoggedIn', () => {
+    console.log('User logged in - initializing app');
     renderDashboard();
-    
-    // Add responsive behavior
-    handleResponsive();
-    window.addEventListener('resize', handleResponsive);
 });
 
-// Handle responsive behavior
-function handleResponsive() {
-    const isMobile = window.innerWidth < 768;
-    
-    // Update any responsive-specific behaviors here
-    if (isMobile) {
-        // Mobile-specific initialization
-        document.body.classList.add('is-mobile');
-    } else {
-        // Desktop-specific initialization
-        document.body.classList.remove('is-mobile');
-    }
-}
-
-// Prevent zoom on input focus (iOS)
-document.addEventListener('touchstart', function() {}, {passive: true});
-
-// Handle safe area insets for iOS
-if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', () => {
-        document.documentElement.style.setProperty(
-            '--viewport-height',
-            `${window.visualViewport.height}px`
-        );
-    });
-}
-
-console.log('Wealth App Loaded Successfully');
+console.log('✅ Retirement Planning App Loaded Successfully');
+console.log('✅ showPage function available');
