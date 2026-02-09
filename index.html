@@ -743,12 +743,14 @@
                     <button class="nav-item" onclick="showPage('retirement401k')">Retirement</button>
                     <button class="nav-item" onclick="showPage('socialSecurity')">Social Security</button>
                     <button class="nav-item" onclick="showPage('taxes')">Taxes</button>
+                    <button class="nav-item" onclick="showPage('profile')">Settings</button>
                 </div>
             </nav>
             
             <!-- Main Content -->
             <main class="main-content">
                 <div id="dashboard" class="page active"></div>
+                <div id="profile" class="page"></div>
                 <div id="family" class="page"></div>
                 <div id="income" class="page"></div>
                 <div id="expenses" class="page"></div>
@@ -819,6 +821,10 @@
                     <span class="mobile-menu-icon">💰</span>
                     <span>Taxes</span>
                 </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('profile')" data-page="profile">
+                    <span class="mobile-menu-icon">⚙️</span>
+                    <span>Settings</span>
+                </button>
             </div>
         </div>
     </div>
@@ -832,6 +838,7 @@
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/profile.js"></script>
     <script type="module" src="js/familyMembers.js"></script>
     <script type="module" src="js/income.js"></script>
     <script type="module" src="js/expenses.js"></script>
