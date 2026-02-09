@@ -39,7 +39,6 @@
             --text-tertiary: #3C3C4399;
             --separator: #3C3C4349;
             
-            /* SF Pro Display/Text font simulation */
             --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
             
             /* Spacing */
@@ -96,13 +95,13 @@
             overflow-x: hidden;
         }
         
-        /* Container - Desktop & Mobile */
+        /* Container */
         .app-container {
             min-height: 100vh;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 80px); /* Space for mobile nav */
+            padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
         }
         
-        /* Header - Apple Style */
+        /* Header */
         .app-header {
             position: sticky;
             top: 0;
@@ -141,10 +140,10 @@
         .user-email {
             font-size: 15px;
             color: var(--text-secondary);
-            display: none; /* Hidden on mobile */
+            display: none;
         }
         
-        .btn-icon-only {
+        .btn-icon-only, .hamburger-btn {
             width: 40px;
             height: 40px;
             border-radius: 20px;
@@ -158,7 +157,7 @@
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        .btn-icon-only:active {
+        .btn-icon-only:active, .hamburger-btn:active {
             transform: scale(0.95);
             background: var(--gray-5);
         }
@@ -265,7 +264,110 @@
             font-size: 24px;
         }
         
-        /* Cards - Apple Style */
+        /* Mobile Menu Drawer */
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 999;
+            display: none;
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .mobile-menu-overlay.active {
+            display: block;
+        }
+        
+        .mobile-menu-drawer {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            max-width: 80vw;
+            height: 100vh;
+            background: var(--bg-primary);
+            z-index: 1000;
+            transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow-y: auto;
+            box-shadow: -4px 0 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .mobile-menu-drawer.active {
+            right: 0;
+        }
+        
+        .mobile-menu-header {
+            padding: 20px;
+            border-bottom: 0.5px solid var(--separator);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .mobile-menu-title {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--apple-blue) 0%, var(--apple-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .mobile-menu-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .mobile-menu-items {
+            padding: 8px;
+        }
+        
+        .mobile-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 4px;
+            border-radius: 12px;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+            font-size: 17px;
+            color: var(--text-primary);
+            transition: background 0.2s;
+        }
+        
+        .mobile-menu-item:active {
+            background: var(--bg-secondary);
+        }
+        
+        .mobile-menu-item.active {
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--apple-blue);
+            font-weight: 600;
+        }
+        
+        .mobile-menu-icon {
+            font-size: 24px;
+            width: 28px;
+            text-align: center;
+        }
+        
+        /* Cards */
         .card {
             background: var(--bg-primary);
             border-radius: var(--radius-lg);
@@ -292,110 +394,7 @@
             margin-bottom: var(--spacing-sm);
         }
         
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-lg);
-        }
-        
-        .stat-card {
-            background: var(--bg-primary);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            box-shadow: var(--shadow-md);
-            border: 0.5px solid var(--separator);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-        }
-        
-        .stat-card:active {
-            transform: scale(0.98);
-        }
-        
-        .stat-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        .stat-label {
-            font-size: 15px;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .stat-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        
-        .stat-value {
-            font-size: 34px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            margin-bottom: 4px;
-        }
-        
-        .stat-change {
-            font-size: 13px;
-            font-weight: 600;
-        }
-        
-        .stat-change.positive {
-            color: var(--apple-green);
-        }
-        
-        .stat-change.negative {
-            color: var(--apple-red);
-        }
-        
-        /* Market Cards */
-        .market-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: var(--spacing-md);
-        }
-        
-        .market-card {
-            background: var(--bg-primary);
-            border-radius: var(--radius-md);
-            padding: var(--spacing-md);
-            text-align: center;
-            box-shadow: var(--shadow-sm);
-            border: 0.5px solid var(--separator);
-        }
-        
-        .market-label {
-            font-size: 13px;
-            color: var(--text-secondary);
-            font-weight: 600;
-            margin-bottom: var(--spacing-xs);
-        }
-        
-        .market-value {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 4px;
-        }
-        
-        .market-change {
-            font-size: 13px;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-        }
-        
-        /* Buttons - Apple Style */
+        /* Buttons */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -408,7 +407,6 @@
             border: none;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            -webkit-touch-callout: none;
             user-select: none;
         }
         
@@ -432,7 +430,7 @@
             transform: scale(0.96);
         }
         
-        /* Forms - Apple Style */
+        /* Forms */
         .form-group {
             margin-bottom: var(--spacing-md);
         }
@@ -468,7 +466,7 @@
             box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
         }
         
-        /* Tables - Apple Style */
+        /* Tables */
         .table-container {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
@@ -563,26 +561,16 @@
                 display: block;
             }
             
+            .hamburger-btn {
+                display: none;
+            }
+            
             .app-title {
                 font-size: 34px;
             }
             
             .main-content {
                 padding: var(--spacing-xl) var(--spacing-lg);
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .market-grid {
-                grid-template-columns: repeat(3, 1fr);
             }
         }
         
@@ -605,74 +593,10 @@
                 font-size: 20px;
             }
             
-            .stat-card {
-                padding: var(--spacing-md);
-            }
-            
-            .stat-value {
-                font-size: 28px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .market-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .form-input,
             .form-select,
             .btn {
-                font-size: 16px; /* Prevents zoom on iOS */
-            }
-        }
-        
-        /* Small Mobile */
-        @media (max-width: 375px) {
-            .main-content {
-                padding: var(--spacing-sm);
-            }
-            
-            .mobile-nav-item {
-                font-size: 9px;
-            }
-            
-            .mobile-nav-icon {
-                font-size: 22px;
-            }
-        }
-        
-        /* Landscape Mobile */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .app-header {
-                position: relative;
-            }
-            
-            .desktop-nav {
-                position: relative;
-                top: 0;
-            }
-        }
-        
-        /* Tablet Portrait */
-        @media (min-width: 768px) and (max-width: 1023px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        /* Print Styles */
-        @media print {
-            .app-header,
-            .desktop-nav,
-            .mobile-nav,
-            .btn {
-                display: none;
-            }
-            
-            .main-content {
-                max-width: 100%;
+                font-size: 16px;
             }
         }
     </style>
@@ -726,6 +650,9 @@
                     <h1 class="app-title">Wealth</h1>
                     <div class="user-menu">
                         <span class="user-email" id="userEmail"></span>
+                        <button class="hamburger-btn" onclick="toggleMobileMenu()" title="Menu">
+                            <span>☰</span>
+                        </button>
                         <button class="btn-icon-only" onclick="handleLogout()" title="Sign Out">
                             <span>⎋</span>
                         </button>
@@ -779,6 +706,49 @@
                 </button>
             </nav>
         </div>
+        
+        <!-- Mobile Menu Drawer -->
+        <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+        <div class="mobile-menu-drawer" id="mobileMenuDrawer">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-title">Menu</div>
+                <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+            </div>
+            <div class="mobile-menu-items">
+                <button class="mobile-menu-item active" onclick="navigateToPage('dashboard')" data-page="dashboard">
+                    <span class="mobile-menu-icon">📊</span>
+                    <span>Dashboard</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('family')" data-page="family">
+                    <span class="mobile-menu-icon">👥</span>
+                    <span>Family</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('income')" data-page="income">
+                    <span class="mobile-menu-icon">💼</span>
+                    <span>Income</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('expenses')" data-page="expenses">
+                    <span class="mobile-menu-icon">💳</span>
+                    <span>Expenses</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('investments')" data-page="investments">
+                    <span class="mobile-menu-icon">📈</span>
+                    <span>Investments</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('retirement401k')" data-page="retirement401k">
+                    <span class="mobile-menu-icon">🏦</span>
+                    <span>Retirement</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('socialSecurity')" data-page="socialSecurity">
+                    <span class="mobile-menu-icon">📋</span>
+                    <span>Social Security</span>
+                </button>
+                <button class="mobile-menu-item" onclick="navigateToPage('taxes')" data-page="taxes">
+                    <span class="mobile-menu-icon">💰</span>
+                    <span>Taxes</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Firebase -->
@@ -799,5 +769,37 @@
     <script type="module" src="js/taxProjections.js"></script>
     <script type="module" src="js/dashboard.js"></script>
     <script type="module" src="js/app.js"></script>
+    
+    <!-- Mobile Menu Functions -->
+    <script>
+    function toggleMobileMenu() {
+        const overlay = document.getElementById('mobileMenuOverlay');
+        const drawer = document.getElementById('mobileMenuDrawer');
+        overlay.classList.toggle('active');
+        drawer.classList.toggle('active');
+    }
+
+    function closeMobileMenu() {
+        const overlay = document.getElementById('mobileMenuOverlay');
+        const drawer = document.getElementById('mobileMenuDrawer');
+        overlay.classList.remove('active');
+        drawer.classList.remove('active');
+    }
+
+    function navigateToPage(pageName) {
+        document.querySelectorAll('.mobile-menu-item').forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('data-page') === pageName) {
+                item.classList.add('active');
+            }
+        });
+        
+        if (window.showPage) {
+            window.showPage(pageName);
+        }
+        
+        closeMobileMenu();
+    }
+    </script>
 </body>
 </html>
