@@ -1,10 +1,11 @@
-// Family Members Module - FINAL WORKING VERSION
+// Family Members Module - FIXED (No Duplicate Saves)
 import { initializeFirebase } from './config.js';
 import { getUserId } from './auth.js';
 import { calculateAge } from './utils.js';
 
 let database;
 export let familyMembers = [];
+let isSaving = false; // Prevent duplicate saves
 
 export function initFamilyMembers() {
     const { database: db } = initializeFirebase();
@@ -20,44 +21,49 @@ export function renderFamilyPage() {
     const container = document.getElementById('family');
     if (!container) return;
     
-    const isMobile = window.innerWidth < 768;
-    
     container.innerHTML = `
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                 <h3 class="card-title" style="margin: 0;">Family Members</h3>
-                <button class="btn btn-primary" onclick="window.showAddFamilyForm()" style="padding: 8px 16px; font-size: 15px;">+ Add</button>
+                <button class="btn btn-primary" id="showAddFamilyBtn" style="padding: 8px 16px; font-size: 15px;">+ Add</button>
             </div>
             <div id="familyList"></div>
         </div>
         
         <div id="addFamilyForm" class="card hidden">
             <h3 class="card-title">Add Family Member</h3>
-            <div class="form-group">
-                <label class="form-label">Name</label>
-                <input type="text" class="form-input" id="familyName" placeholder="Full name" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label">Relationship</label>
-                <select class="form-select" id="familyRelationship">
-                    <option value="self">Self</option>
-                    <option value="spouse">Spouse/Partner</option>
-                    <option value="child">Child</option>
-                    <option value="parent">Parent</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Birth Date</label>
-                <input type="date" class="form-input" id="familyBirthDate">
-            </div>
-            <div style="display: flex; gap: 12px;">
-                <button class="btn btn-primary" onclick="window.saveFamilyMember()" style="flex: 1;">Save</button>
-                <button class="btn btn-secondary" onclick="window.hideAddFamilyForm()">Cancel</button>
-            </div>
-            <div id="familyMessage" style="margin-top: 12px; padding: 12px; border-radius: 10px; display: none;"></div>
+            <form id="familyForm" onsubmit="return false;">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-input" id="familyName" placeholder="Full name" autocomplete="off" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Relationship</label>
+                    <select class="form-select" id="familyRelationship" required>
+                        <option value="self">Self</option>
+                        <option value="spouse">Spouse/Partner</option>
+                        <option value="child">Child</option>
+                        <option value="parent">Parent</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Birth Date</label>
+                    <input type="date" class="form-input" id="familyBirthDate" required>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="submit" class="btn btn-primary" id="saveFamilyBtn" style="flex: 1;">Save</button>
+                    <button type="button" class="btn btn-secondary" id="cancelFamilyBtn">Cancel</button>
+                </div>
+                <div id="familyMessage" style="margin-top: 12px; padding: 12px; border-radius: 10px; display: none;"></div>
+            </form>
         </div>
     `;
+    
+    // Attach event listeners
+    document.getElementById('showAddFamilyBtn').addEventListener('click', showAddFamilyForm);
+    document.getElementById('familyForm').addEventListener('submit', saveFamilyMember);
+    document.getElementById('cancelFamilyBtn').addEventListener('click', hideAddFamilyForm);
     
     renderFamilyList();
 }
@@ -90,95 +96,107 @@ export async function loadFamilyMembers() {
     }
 }
 
-window.showAddFamilyForm = function() {
+function showAddFamilyForm(e) {
+    e.preventDefault();
+    e.stopPropagation();
     console.log('Showing add family form');
     const form = document.getElementById('addFamilyForm');
     if (form) {
         form.classList.remove('hidden');
         form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        document.getElementById('familyName').focus();
     }
-};
+}
 
-window.hideAddFamilyForm = function() {
+function hideAddFamilyForm(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
     const form = document.getElementById('addFamilyForm');
     if (form) {
         form.classList.add('hidden');
         clearFamilyForm();
     }
-};
+}
 
-window.saveFamilyMember = async function() {
+async function saveFamilyMember(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent duplicate saves
+    if (isSaving) {
+        console.log('Already saving, ignoring duplicate call');
+        return false;
+    }
+    
+    isSaving = true;
     console.log('=== SAVE FAMILY MEMBER CLICKED ===');
     
-    const nameInput = document.getElementById('familyName');
-    const relationshipInput = document.getElementById('familyRelationship');
-    const birthDateInput = document.getElementById('familyBirthDate');
-    
-    if (!nameInput || !relationshipInput || !birthDateInput) {
-        console.error('Form inputs not found!');
-        showMessage('Error: Form not loaded properly', 'error');
-        return;
+    const saveBtn = document.getElementById('saveFamilyBtn');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Saving...';
     }
-    
-    const name = nameInput.value.trim();
-    const relationship = relationshipInput.value;
-    const birthDate = birthDateInput.value;
-    
-    console.log('Form values:', { name, relationship, birthDate });
-    
-    // Validation
-    if (!name) {
-        console.log('Validation failed: no name');
-        showMessage('Please enter a name', 'error');
-        return;
-    }
-    
-    if (!birthDate) {
-        console.log('Validation failed: no birth date');
-        showMessage('Please enter a birth date', 'error');
-        return;
-    }
-    
-    const userId = getUserId();
-    console.log('User ID:', userId);
-    
-    if (!userId) {
-        console.error('No user ID - user not logged in');
-        showMessage('You must be logged in', 'error');
-        return;
-    }
-    
-    const member = {
-        name,
-        relationship,
-        birthDate,
-        age: calculateAge(birthDate),
-        createdAt: new Date().toISOString()
-    };
-    
-    const memberId = 'fam_' + Date.now();
-    
-    console.log('Saving member to Firebase:', memberId, member);
     
     try {
+        const name = document.getElementById('familyName').value.trim();
+        const relationship = document.getElementById('familyRelationship').value;
+        const birthDate = document.getElementById('familyBirthDate').value;
+        
+        console.log('Form values:', { name, relationship, birthDate });
+        
+        if (!name || !birthDate) {
+            showMessage('Please fill in all fields', 'error');
+            return false;
+        }
+        
+        const userId = getUserId();
+        console.log('User ID:', userId);
+        
+        if (!userId) {
+            showMessage('You must be logged in', 'error');
+            return false;
+        }
+        
+        const member = {
+            name,
+            relationship,
+            birthDate,
+            age: calculateAge(birthDate),
+            createdAt: new Date().toISOString()
+        };
+        
+        const memberId = 'fam_' + Date.now();
+        console.log('Saving to Firebase:', memberId);
+        
         await database.ref(`users/${userId}/familyMembers/${memberId}`).set(member);
-        console.log('✅ Member saved successfully!');
+        console.log('✅ Saved successfully!');
         
-        showMessage('Family member saved!', 'success');
+        showMessage('✓ Family member added!', 'success');
         
-        // Reload the list
+        // Reload list
         await loadFamilyMembers();
         
-        // Hide form after short delay
+        // Hide form after delay
         setTimeout(() => {
-            window.hideAddFamilyForm();
+            hideAddFamilyForm();
         }, 1500);
         
     } catch (error) {
-        console.error('❌ Error saving family member:', error);
-        showMessage('Error saving: ' + error.message, 'error');
+        console.error('❌ Error:', error);
+        showMessage('Error: ' + error.message, 'error');
+    } finally {
+        isSaving = false;
+        const saveBtn = document.getElementById('saveFamilyBtn');
+        if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save';
+        }
     }
-};
+    
+    return false;
+}
 
 window.deleteFamilyMember = async function(memberId) {
     if (!confirm('Delete this family member?')) return;
@@ -192,7 +210,6 @@ window.deleteFamilyMember = async function(memberId) {
         await loadFamilyMembers();
     } catch (error) {
         console.error('Error deleting:', error);
-        showMessage('Error deleting member', 'error');
     }
 };
 
@@ -201,7 +218,7 @@ function renderFamilyList() {
     if (!container) return;
     
     if (familyMembers.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: var(--label-tertiary); padding: 32px 16px; font-size: 15px;">No family members added yet.<br>Tap "+ Add" to get started.</p>';
+        container.innerHTML = '<p style="text-align: center; color: var(--label-tertiary); padding: 32px 16px; font-size: 15px;">No family members yet.<br>Tap "+ Add" to get started.</p>';
         return;
     }
     
@@ -243,7 +260,7 @@ function renderFamilyList() {
                 <td>${new Date(member.birthDate).toLocaleDateString()}</td>
                 <td>
                     <button class="btn btn-secondary" onclick="window.deleteFamilyMember('${member.id}')" 
-                        style="padding: 6px 12px; font-size: 13px; background: rgba(255, 59, 48, 0.12); color: var(--apple-red);">
+                        style="padding: 6px 12px; font-size: 13px;">
                         Delete
                     </button>
                 </td>
@@ -256,13 +273,10 @@ function renderFamilyList() {
 }
 
 function clearFamilyForm() {
-    const nameInput = document.getElementById('familyName');
-    const relationshipInput = document.getElementById('familyRelationship');
-    const birthDateInput = document.getElementById('familyBirthDate');
-    
-    if (nameInput) nameInput.value = '';
-    if (relationshipInput) relationshipInput.value = 'self';
-    if (birthDateInput) birthDateInput.value = '';
+    const form = document.getElementById('familyForm');
+    if (form) {
+        form.reset();
+    }
     
     const message = document.getElementById('familyMessage');
     if (message) {
@@ -288,5 +302,5 @@ function showMessage(text, type) {
     }
 }
 
-console.log('Family Members module loaded');
+console.log('✅ Family Members module loaded');
 initFamilyMembers();
