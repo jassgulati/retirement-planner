@@ -1,6 +1,7 @@
-// Main Application File - WORKING VERSION
+// Main Application File - Enhanced with Profile/Settings
 import { renderDashboard } from './dashboard.js';
 import { renderFamilyPage } from './familyMembers.js';
+import { renderProfilePage } from './profile.js';
 import { renderIncomePage } from './income.js';
 import { renderExpensesPage } from './expenses.js';
 import { renderInvestmentsPage } from './investments.js';
@@ -18,7 +19,7 @@ window.showPage = function(pageName) {
     });
     
     // Remove active from all nav items
-    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+    document.querySelectorAll('.nav-item, .mobile-nav-item, .mobile-menu-item').forEach(item => {
         item.classList.remove('active');
     });
     
@@ -30,12 +31,13 @@ window.showPage = function(pageName) {
     }
     
     // Set active nav item
-    document.querySelectorAll('.nav-item, .mobile-nav-item').forEach(item => {
+    document.querySelectorAll('.nav-item, .mobile-nav-item, .mobile-menu-item').forEach(item => {
         const itemText = item.textContent.toLowerCase();
         const dataPage = item.getAttribute('data-page');
         
         if (dataPage === pageName || 
             (pageName === 'dashboard' && (itemText.includes('overview') || itemText.includes('dashboard'))) ||
+            (pageName === 'profile' && (itemText.includes('settings') || itemText.includes('profile'))) ||
             (pageName === 'family' && itemText.includes('family')) ||
             (pageName === 'income' && itemText.includes('income')) ||
             (pageName === 'expenses' && (itemText.includes('expenses') || itemText.includes('spend'))) ||
@@ -52,6 +54,9 @@ window.showPage = function(pageName) {
         switch(pageName) {
             case 'dashboard':
                 renderDashboard();
+                break;
+            case 'profile':
+                renderProfilePage();
                 break;
             case 'family':
                 renderFamilyPage();
