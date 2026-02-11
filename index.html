@@ -2,883 +2,153 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Wealth</title>
-    <style>
-        :root {
-            --apple-gray-1: #1c1c1e;
-            --apple-gray-2: #2c2c2e;
-            --apple-gray-3: #3a3a3c;
-            --apple-gray-4: #48484a;
-            --apple-gray-5: #636366;
-            --apple-gray-6: #8e8e93;
-            
-            --apple-blue: #007AFF;
-            --apple-green: #34C759;
-            --apple-indigo: #5856D6;
-            --apple-orange: #FF9500;
-            --apple-pink: #FF2D55;
-            --apple-purple: #AF52DE;
-            --apple-red: #FF3B30;
-            --apple-teal: #5AC8FA;
-            --apple-yellow: #FFCC00;
-            
-            --bg-primary: #ffffff;
-            --bg-secondary: #f2f2f7;
-            --bg-tertiary: #ffffff;
-            --label-primary: #000000;
-            --label-secondary: #3c3c43;
-            --label-tertiary: rgba(60, 60, 67, 0.6);
-            --label-quaternary: rgba(60, 60, 67, 0.18);
-            --fill-primary: rgba(120, 120, 128, 0.2);
-            --fill-secondary: rgba(120, 120, 128, 0.16);
-            --fill-tertiary: rgba(118, 118, 128, 0.12);
-            --separator: rgba(60, 60, 67, 0.29);
-            --separator-opaque: #c6c6c8;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-primary: #000000;
-                --bg-secondary: #1c1c1e;
-                --bg-tertiary: #2c2c2e;
-                --label-primary: #ffffff;
-                --label-secondary: rgba(235, 235, 245, 0.6);
-                --label-tertiary: rgba(235, 235, 245, 0.3);
-                --label-quaternary: rgba(235, 235, 245, 0.18);
-                --fill-primary: rgba(120, 120, 128, 0.36);
-                --fill-secondary: rgba(120, 120, 128, 0.32);
-                --fill-tertiary: rgba(118, 118, 128, 0.24);
-                --separator: rgba(84, 84, 88, 0.65);
-                --separator-opaque: #38383a;
-            }
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        html {
-            font-size: 17px;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            text-rendering: optimizeLegibility;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", sans-serif;
-            background: var(--bg-secondary);
-            color: var(--label-primary);
-            line-height: 1.47058823529;
-            font-weight: 400;
-            letter-spacing: -0.022em;
-        }
-        
-        /* Glass morphism effects */
-        .glass {
-            background: rgba(255, 255, 255, 0.72);
-            backdrop-filter: blur(40px) saturate(180%);
-            -webkit-backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .glass {
-                background: rgba(28, 28, 30, 0.72);
-                border: 1px solid rgba(255, 255, 255, 0.08);
-            }
-        }
-        
-        /* App Container */
-        .app-container {
-            min-height: 100vh;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 90px);
-        }
-        
-        /* Header with blur */
-        .app-header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 0.33px solid var(--separator);
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .app-header {
-                background: rgba(28, 28, 30, 0.8);
-            }
-        }
-        
-        .header-content {
-            max-width: 1024px;
-            margin: 0 auto;
-            padding: 16px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .app-title {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.028em;
-            background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #AF52DE 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .user-menu {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .user-email {
-            font-size: 15px;
-            color: var(--label-secondary);
-            display: none;
-        }
-        
-        .btn-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 18px;
-            background: var(--fill-tertiary);
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            transition: all 0.15s ease-out;
-        }
-        
-        .btn-icon:active {
-            transform: scale(0.92);
-            background: var(--fill-secondary);
-        }
-        
-        /* Desktop Nav */
-        .desktop-nav {
-            display: none;
-            position: sticky;
-            top: 68px;
-            z-index: 999;
-            background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-bottom: 0.33px solid var(--separator);
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .desktop-nav {
-                background: rgba(28, 28, 30, 0.8);
-            }
-        }
-        
-        .desktop-nav-content {
-            max-width: 1024px;
-            margin: 0 auto;
-            padding: 8px 20px;
-            display: flex;
-            gap: 8px;
-            overflow-x: auto;
-            scrollbar-width: none;
-        }
-        
-        .desktop-nav-content::-webkit-scrollbar {
-            display: none;
-        }
-        
-        .nav-item {
-            padding: 8px 16px;
-            border: none;
-            background: none;
-            color: var(--label-secondary);
-            font-size: 15px;
-            font-weight: 400;
-            cursor: pointer;
-            white-space: nowrap;
-            border-radius: 8px;
-            transition: all 0.15s ease-out;
-        }
-        
-        .nav-item:hover {
-            background: var(--fill-tertiary);
-        }
-        
-        .nav-item.active {
-            color: var(--label-primary);
-            font-weight: 600;
-            background: var(--fill-secondary);
-        }
-        
-        /* Main Content */
-        .main-content {
-            max-width: 1024px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        /* Floating cards with soft shadows */
-        .card {
-            background: var(--bg-tertiary);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.04), 
-                        0 2px 2px rgba(0,0,0,0.04), 
-                        0 4px 4px rgba(0,0,0,0.04), 
-                        0 8px 8px rgba(0,0,0,0.04);
-            border: 0.5px solid var(--separator);
-        }
-        
-        .card-title {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.026em;
-            margin-bottom: 16px;
-            color: var(--label-primary);
-        }
-        
-        /* Stats cards - iOS style */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .stat-card {
-            background: var(--bg-tertiary);
-            border-radius: 14px;
-            padding: 16px;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.06), 
-                        0 2px 4px rgba(0,0,0,0.06);
-            border: 0.5px solid var(--separator);
-            transition: transform 0.15s ease-out;
-        }
-        
-        .stat-card:active {
-            transform: scale(0.98);
-        }
-        
-        .stat-label {
-            font-size: 13px;
-            color: var(--label-secondary);
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: -0.08px;
-            margin-bottom: 8px;
-        }
-        
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: -0.028em;
-            color: var(--label-primary);
-            margin-bottom: 4px;
-        }
-        
-        .stat-change {
-            font-size: 13px;
-            font-weight: 600;
-        }
-        
-        .stat-change.positive {
-            color: var(--apple-green);
-        }
-        
-        .stat-change.negative {
-            color: var(--apple-red);
-        }
-        
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-size: 17px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.15s ease-out;
-            user-select: none;
-        }
-        
-        .btn-primary {
-            background: var(--apple-blue);
-            color: white;
-        }
-        
-        .btn-primary:active {
-            transform: scale(0.96);
-            opacity: 0.88;
-        }
-        
-        .btn-secondary {
-            background: var(--fill-secondary);
-            color: var(--label-primary);
-        }
-        
-        .btn-secondary:active {
-            background: var(--fill-primary);
-            transform: scale(0.96);
-        }
-        
-        /* Forms */
-        .form-group {
-            margin-bottom: 16px;
-        }
-        
-        .form-label {
-            display: block;
-            font-size: 13px;
-            color: var(--label-secondary);
-            font-weight: 600;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: -0.08px;
-        }
-        
-        .form-input,
-        .form-select {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: none;
-            background: var(--fill-tertiary);
-            color: var(--label-primary);
-            font-size: 17px;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            transition: all 0.15s ease-out;
-        }
-        
-        .form-input:focus,
-        .form-select:focus {
-            outline: none;
-            background: var(--fill-secondary);
-            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
-        }
-        
-        /* Tables */
-        .table-container {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            border-radius: 12px;
-            background: var(--bg-tertiary);
-            border: 0.5px solid var(--separator);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th {
-            background: var(--fill-quaternary);
-            padding: 12px 16px;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--label-secondary);
-            text-transform: uppercase;
-            letter-spacing: -0.08px;
-            border-bottom: 0.5px solid var(--separator);
-        }
-        
-        td {
-            padding: 14px 16px;
-            border-bottom: 0.5px solid var(--separator);
-            font-size: 15px;
-            color: var(--label-primary);
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        /* Mobile Navigation */
-        .mobile-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(242, 242, 247, 0.8);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-top: 0.33px solid var(--separator);
-            padding-bottom: env(safe-area-inset-bottom);
-            z-index: 1000;
-            display: flex;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .mobile-nav {
-                background: rgba(28, 28, 30, 0.8);
-            }
-        }
-        
-        .mobile-nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 6px 0 2px;
-            gap: 4px;
-            border: none;
-            background: none;
-            color: var(--label-tertiary);
-            font-size: 10px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: color 0.15s;
-        }
-        
-        .mobile-nav-item.active {
-            color: var(--apple-blue);
-        }
-        
-        .mobile-nav-icon {
-            font-size: 22px;
-        }
-        
-        /* Mobile Menu Drawer */
-        .mobile-menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            z-index: 1999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease-out;
-        }
-        
-        .mobile-menu-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        .mobile-menu-drawer {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 300px;
-            max-width: 85vw;
-            height: 100%;
-            background: var(--bg-primary);
-            z-index: 2000;
-            transition: right 0.3s cubic-bezier(0.36, 0.66, 0.04, 1);
-            overflow-y: auto;
-            box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
-        }
-        
-        .mobile-menu-drawer.active {
-            right: 0;
-        }
-        
-        .mobile-menu-header {
-            padding: 20px;
-            border-bottom: 0.33px solid var(--separator);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .mobile-menu-title {
-            font-size: 22px;
-            font-weight: 700;
-            letter-spacing: -0.026em;
-            background: linear-gradient(135deg, #007AFF 0%, #AF52DE 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .mobile-menu-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 16px;
-            background: var(--fill-tertiary);
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.15s;
-        }
-        
-        .mobile-menu-close:active {
-            transform: scale(0.92);
-            background: var(--fill-secondary);
-        }
-        
-        .mobile-menu-items {
-            padding: 8px;
-        }
-        
-        .mobile-menu-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            margin-bottom: 2px;
-            border-radius: 10px;
-            background: none;
-            border: none;
-            width: 100%;
-            text-align: left;
-            cursor: pointer;
-            font-size: 17px;
-            color: var(--label-primary);
-            font-weight: 400;
-            transition: all 0.15s;
-        }
-        
-        .mobile-menu-item:active {
-            background: var(--fill-tertiary);
-            transform: scale(0.98);
-        }
-        
-        .mobile-menu-item.active {
-            background: rgba(0, 122, 255, 0.1);
-            color: var(--apple-blue);
-            font-weight: 600;
-        }
-        
-        .mobile-menu-icon {
-            font-size: 22px;
-            width: 24px;
-            text-align: center;
-        }
-        
-        /* Auth Screen */
-        .auth-container {
-            max-width: 400px;
-            margin: 80px auto;
-            padding: 32px;
-            background: var(--bg-tertiary);
-            border-radius: 20px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.08), 
-                        0 16px 32px rgba(0,0,0,0.08);
-            border: 0.5px solid var(--separator);
-        }
-        
-        .auth-title {
-            font-size: 34px;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 32px;
-            letter-spacing: -0.03em;
-            background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #AF52DE 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Utility */
-        .hidden {
-            display: none !important;
-        }
-        
-        .page {
-            display: none;
-        }
-        
-        .page.active {
-            display: block;
-            animation: fadeIn 0.25s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        /* Responsive */
-        @media (min-width: 768px) {
-            .desktop-nav {
-                display: block;
-            }
-            
-            .mobile-nav {
-                display: none;
-            }
-            
-            .user-email {
-                display: block;
-            }
-            
-            .btn-icon.hamburger-btn {
-                display: none;
-            }
-            
-            .main-content {
-                padding: 28px 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        
-        @media (max-width: 767px) {
-            .app-title {
-                font-size: 24px;
-            }
-            
-            .main-content {
-                padding: 16px;
-            }
-            
-            .card {
-                padding: 16px;
-                border-radius: 14px;
-            }
-            
-            .card-title {
-                font-size: 20px;
-            }
-            
-            .stat-value {
-                font-size: 24px;
-            }
-            
-            .form-input,
-            .form-select,
-            .btn {
-                font-size: 16px;
-            }
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth - Retirement Planning</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Auth Screen -->
-    <div id="authScreen" class="hidden">
-        <div class="auth-container">
-            <h2 class="auth-title">Wealth</h2>
+    <!-- Auth Container -->
+    <div id="authContainer">
+        <div class="auth-box">
+            <h1>💰 Wealth</h1>
+            <p>Your Personal Retirement Planner</p>
             
             <div id="loginForm">
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="loginEmail" placeholder="your@email.com">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" id="loginPassword" placeholder="Enter password">
-                </div>
-                <button class="btn btn-primary" onclick="handleLogin()" style="width: 100%; margin-bottom: 16px;">Sign In</button>
-                <p style="text-align: center; font-size: 15px; color: var(--label-secondary);">
-                    New user? <a href="#" onclick="showSignup()" style="color: var(--apple-blue); text-decoration: none; font-weight: 600;">Create Account</a>
-                </p>
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button id="loginBtn" class="primary-button">Login</button>
+                <p class="auth-toggle">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
             </div>
             
-            <div id="signupForm" class="hidden">
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-input" id="signupEmail" placeholder="your@email.com">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-input" id="signupPassword" placeholder="Create password">
-                </div>
-                <button class="btn btn-primary" onclick="handleSignup()" style="width: 100%; margin-bottom: 16px;">Create Account</button>
-                <p style="text-align: center; font-size: 15px; color: var(--label-secondary);">
-                    Have an account? <a href="#" onclick="showLogin()" style="color: var(--apple-blue); text-decoration: none; font-weight: 600;">Sign In</a>
-                </p>
+            <div id="signupForm" style="display: none;">
+                <h2>Sign Up</h2>
+                <input type="email" id="signupEmail" placeholder="Email">
+                <input type="password" id="signupPassword" placeholder="Password">
+                <button id="signupBtn" class="primary-button">Sign Up</button>
+                <p class="auth-toggle">Already have an account? <a href="#" id="showLogin">Login</a></p>
             </div>
-            
-            <div id="authError" class="hidden" style="margin-top: 16px; padding: 12px; background: rgba(255, 59, 48, 0.12); color: var(--apple-red); border-radius: 10px; font-size: 15px; text-align: center;"></div>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="mainApp" class="hidden">
-        <div class="app-container">
-            <!-- Header -->
-            <header class="app-header">
-                <div class="header-content">
-                    <h1 class="app-title">Wealth</h1>
-                    <div class="user-menu">
-                        <span class="user-email" id="userEmail"></span>
-                        <button class="btn-icon hamburger-btn" onclick="toggleMobileMenu()" title="Menu">
-                            <span>☰</span>
-                        </button>
-                        <button class="btn-icon" onclick="handleLogout()" title="Sign Out">
-                            <span>⎋</span>
-                        </button>
-                    </div>
-                </div>
-            </header>
-            
-            <!-- Desktop Navigation -->
-            <nav class="desktop-nav">
-                <div class="desktop-nav-content">
-                    <button class="nav-item active" onclick="showPage('dashboard')">Overview</button>
-                    <button class="nav-item" onclick="showPage('family')">Family</button>
-                    <button class="nav-item" onclick="showPage('income')">Income</button>
-                    <button class="nav-item" onclick="showPage('expenses')">Expenses</button>
-                    <button class="nav-item" onclick="showPage('investments')">Investments</button>
-                    <button class="nav-item" onclick="showPage('retirement401k')">Retirement</button>
-                    <button class="nav-item" onclick="showPage('socialSecurity')">Social Security</button>
-                    <button class="nav-item" onclick="showPage('taxes')">Taxes</button>
-                    <button class="nav-item" onclick="showPage('profile')">Settings</button>
-                </div>
-            </nav>
-            
-            <!-- Main Content -->
-            <main class="main-content">
-                <div id="dashboard" class="page active"></div>
-                <div id="profile" class="page"></div>
-                <div id="family" class="page"></div>
-                <div id="income" class="page"></div>
-                <div id="expenses" class="page"></div>
-                <div id="investments" class="page"></div>
-                <div id="retirement401k" class="page"></div>
-                <div id="socialSecurity" class="page"></div>
-                <div id="taxes" class="page"></div>
-            </main>
-            
-            <!-- Mobile Bottom Navigation -->
-            <nav class="mobile-nav">
-                <button class="mobile-nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
-                    <span class="mobile-nav-icon">📊</span>
+    <!-- Main App Container -->
+    <div id="appContainer" style="display: none;">
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav">
+            <div class="nav-brand">💰 Wealth</div>
+            <div class="nav-items">
+                <a href="#" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
                     <span>Overview</span>
-                </button>
-                <button class="mobile-nav-item" onclick="showPage('investments')" data-page="investments">
-                    <span class="mobile-nav-icon">📈</span>
-                    <span>Invest</span>
-                </button>
-                <button class="mobile-nav-item" onclick="showPage('retirement401k')" data-page="retirement401k">
-                    <span class="mobile-nav-icon">🏦</span>
-                    <span>Retire</span>
-                </button>
-                <button class="mobile-nav-item" onclick="showPage('expenses')" data-page="expenses">
-                    <span class="mobile-nav-icon">💳</span>
-                    <span>Spend</span>
-                </button>
-            </nav>
-        </div>
-        
-        <!-- Mobile Menu Drawer -->
-        <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
-        <div class="mobile-menu-drawer" id="mobileMenuDrawer">
-            <div class="mobile-menu-header">
-                <div class="mobile-menu-title">Menu</div>
-                <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
-            </div>
-            <div class="mobile-menu-items">
-                <button class="mobile-menu-item active" onclick="navigateToPage('dashboard')" data-page="dashboard">
-                    <span class="mobile-menu-icon">📊</span>
-                    <span>Dashboard</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('family')" data-page="family">
-                    <span class="mobile-menu-icon">👥</span>
+                </a>
+                <a href="#" class="nav-item" data-page="family">
+                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
                     <span>Family</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('income')" data-page="income">
-                    <span class="mobile-menu-icon">💼</span>
+                </a>
+                <a href="#" class="nav-item" data-page="income">
+                    <span class="nav-icon">💵</span>
                     <span>Income</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('expenses')" data-page="expenses">
-                    <span class="mobile-menu-icon">💳</span>
+                </a>
+                <a href="#" class="nav-item" data-page="expenses">
+                    <span class="nav-icon">💳</span>
                     <span>Expenses</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('investments')" data-page="investments">
-                    <span class="mobile-menu-icon">📈</span>
+                </a>
+                <a href="#" class="nav-item" data-page="investments">
+                    <span class="nav-icon">📈</span>
                     <span>Investments</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('retirement401k')" data-page="retirement401k">
-                    <span class="mobile-menu-icon">🏦</span>
+                </a>
+                <a href="#" class="nav-item" data-page="retirement">
+                    <span class="nav-icon">🏦</span>
                     <span>Retirement</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('socialSecurity')" data-page="socialSecurity">
-                    <span class="mobile-menu-icon">📋</span>
+                </a>
+                <a href="#" class="nav-item" data-page="social-security">
+                    <span class="nav-icon">🇺🇸</span>
                     <span>Social Security</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('taxes')" data-page="taxes">
-                    <span class="mobile-menu-icon">💰</span>
+                </a>
+                <a href="#" class="nav-item" data-page="taxes">
+                    <span class="nav-icon">📝</span>
                     <span>Taxes</span>
-                </button>
-                <button class="mobile-menu-item" onclick="navigateToPage('profile')" data-page="profile">
-                    <span class="mobile-menu-icon">⚙️</span>
+                </a>
+                <a href="#" class="nav-item" data-page="ai-assistant">
+                    <span class="nav-icon">🤖</span>
+                    <span>AI Assistant</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
                     <span>Settings</span>
-                </button>
+                </a>
+            </div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </nav>
+
+        <!-- Hamburger Menu (Mobile) -->
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div class="nav-menu">
+            <div class="nav-menu-header">
+                <h2>💰 Wealth</h2>
+                <button class="close-menu">✕</button>
+            </div>
+            <a href="#" class="nav-menu-item" data-page="dashboard">📊 Dashboard</a>
+            <a href="#" class="nav-menu-item" data-page="family">👨‍👩‍👧‍👦 Family</a>
+            <a href="#" class="nav-menu-item" data-page="income">💵 Income</a>
+            <a href="#" class="nav-menu-item" data-page="expenses">💳 Expenses</a>
+            <a href="#" class="nav-menu-item" data-page="investments">📈 Investments</a>
+            <a href="#" class="nav-menu-item" data-page="retirement">🏦 Retirement</a>
+            <a href="#" class="nav-menu-item" data-page="social-security">🇺🇸 Social Security</a>
+            <a href="#" class="nav-menu-item" data-page="taxes">📝 Taxes</a>
+            <a href="#" class="nav-menu-item" data-page="ai-assistant">🤖 AI Assistant</a>
+            <a href="#" class="nav-menu-item" data-page="settings">⚙️ Settings</a>
+            <div class="nav-menu-footer">
+                <button id="mobileLogoutBtn" class="logout-btn">Logout</button>
             </div>
         </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="content"></div>
+        </main>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-nav">
+            <a href="#" class="mobile-nav-item" data-page="dashboard">
+                <span class="mobile-nav-icon">📊</span>
+                <span class="mobile-nav-label">Overview</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="investments">
+                <span class="mobile-nav-icon">📈</span>
+                <span class="mobile-nav-label">Invest</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="ai-assistant">
+                <span class="mobile-nav-icon">🤖</span>
+                <span class="mobile-nav-label">AI Help</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="expenses">
+                <span class="mobile-nav-icon">💳</span>
+                <span class="mobile-nav-label">Spend</span>
+            </a>
+        </nav>
     </div>
 
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-    <!-- App Modules -->
+    <!-- Firebase and App Scripts -->
     <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/utils.js"></script>
     <script type="module" src="js/profile.js"></script>
     <script type="module" src="js/familyMembers.js"></script>
     <script type="module" src="js/income.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
     <script type="module" src="js/expenses.js"></script>
     <script type="module" src="js/investments.js"></script>
     <script type="module" src="js/retirement401k.js"></script>
     <script type="module" src="js/socialSecurity.js"></script>
     <script type="module" src="js/taxProjections.js"></script>
-    <script type="module" src="js/dashboard.js"></script>
+    <script type="module" src="js/aiAssistant.js"></script>
     <script type="module" src="js/app.js"></script>
-    
-    <!-- Mobile Menu Functions -->
-    <script>
-    function toggleMobileMenu() {
-        const overlay = document.getElementById('mobileMenuOverlay');
-        const drawer = document.getElementById('mobileMenuDrawer');
-        overlay.classList.toggle('active');
-        drawer.classList.toggle('active');
-    }
-
-    function closeMobileMenu() {
-        const overlay = document.getElementById('mobileMenuOverlay');
-        const drawer = document.getElementById('mobileMenuDrawer');
-        overlay.classList.remove('active');
-        drawer.classList.remove('active');
-    }
-
-    function navigateToPage(pageName) {
-        document.querySelectorAll('.mobile-menu-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('data-page') === pageName) {
-                item.classList.add('active');
-            }
-        });
-        
-        if (window.showPage) {
-            window.showPage(pageName);
-        }
-        
-        closeMobileMenu();
-    }
-    </script>
 </body>
 </html>
