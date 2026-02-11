@@ -1,97 +1,154 @@
-// Main Application File - Enhanced with Profile/Settings
-import { renderDashboard } from './dashboard.js';
-import { renderFamilyPage } from './familyMembers.js';
-import { renderProfilePage } from './profile.js';
-import { renderIncomePage } from './income.js';
-import { renderExpensesPage } from './expenses.js';
-import { renderInvestmentsPage } from './investments.js';
-import { renderRetirement401kPage } from './retirement401k.js';
-import { renderSocialSecurityPage } from './socialSecurity.js';
-import { renderTaxPage } from './taxProjections.js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wealth - Retirement Planning</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Auth Container -->
+    <div id="authContainer">
+        <div class="auth-box">
+            <h1>💰 Wealth</h1>
+            <p>Your Personal Retirement Planner</p>
+            
+            <div id="loginForm">
+                <h2>Login</h2>
+                <input type="email" id="loginEmail" placeholder="Email">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button id="loginBtn" class="primary-button">Login</button>
+                <p class="auth-toggle">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+            </div>
+            
+            <div id="signupForm" style="display: none;">
+                <h2>Sign Up</h2>
+                <input type="email" id="signupEmail" placeholder="Email">
+                <input type="password" id="signupPassword" placeholder="Password">
+                <button id="signupBtn" class="primary-button">Sign Up</button>
+                <p class="auth-toggle">Already have an account? <a href="#" id="showLogin">Login</a></p>
+            </div>
+        </div>
+    </div>
 
-// Page navigation - MUST be global for onclick to work
-window.showPage = function(pageName) {
-    console.log('Navigating to:', pageName);
-    
-    // Hide all pages
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // Remove active from all nav items
-    document.querySelectorAll('.nav-item, .mobile-nav-item, .mobile-menu-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    
-    // Show selected page
-    const page = document.getElementById(pageName);
-    if (page) {
-        page.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    
-    // Set active nav item
-    document.querySelectorAll('.nav-item, .mobile-nav-item, .mobile-menu-item').forEach(item => {
-        const itemText = item.textContent.toLowerCase();
-        const dataPage = item.getAttribute('data-page');
-        
-        if (dataPage === pageName || 
-            (pageName === 'dashboard' && (itemText.includes('overview') || itemText.includes('dashboard'))) ||
-            (pageName === 'profile' && (itemText.includes('settings') || itemText.includes('profile'))) ||
-            (pageName === 'family' && itemText.includes('family')) ||
-            (pageName === 'income' && itemText.includes('income')) ||
-            (pageName === 'expenses' && (itemText.includes('expenses') || itemText.includes('spend'))) ||
-            (pageName === 'investments' && (itemText.includes('invest'))) ||
-            (pageName === 'retirement401k' && (itemText.includes('retirement') || itemText.includes('retire'))) ||
-            (pageName === 'socialSecurity' && itemText.includes('social')) ||
-            (pageName === 'taxes' && itemText.includes('tax'))) {
-            item.classList.add('active');
-        }
-    });
-    
-    // Render page content
-    try {
-        switch(pageName) {
-            case 'dashboard':
-                renderDashboard();
-                break;
-            case 'profile':
-                renderProfilePage();
-                break;
-            case 'family':
-                renderFamilyPage();
-                break;
-            case 'income':
-                renderIncomePage();
-                break;
-            case 'expenses':
-                renderExpensesPage();
-                break;
-            case 'investments':
-                renderInvestmentsPage();
-                break;
-            case 'retirement401k':
-                renderRetirement401kPage();
-                break;
-            case 'socialSecurity':
-                renderSocialSecurityPage();
-                break;
-            case 'taxes':
-                renderTaxPage();
-                break;
-            default:
-                console.error('Unknown page:', pageName);
-        }
-    } catch (error) {
-        console.error('Error rendering page:', pageName, error);
-    }
-};
+    <!-- Main App Container -->
+    <div id="appContainer" style="display: none;">
+        <!-- Desktop Navigation -->
+        <nav class="desktop-nav">
+            <div class="nav-brand">💰 Wealth</div>
+            <div class="nav-items">
+                <a href="#" class="nav-item" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>Overview</span>
+                </a>
+                <a href="#" class="nav-item" data-page="family">
+                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
+                    <span>Family</span>
+                </a>
+                <a href="#" class="nav-item" data-page="income">
+                    <span class="nav-icon">💵</span>
+                    <span>Income</span>
+                </a>
+                <a href="#" class="nav-item" data-page="expenses">
+                    <span class="nav-icon">💳</span>
+                    <span>Expenses</span>
+                </a>
+                <a href="#" class="nav-item" data-page="investments">
+                    <span class="nav-icon">📈</span>
+                    <span>Investments</span>
+                </a>
+                <a href="#" class="nav-item" data-page="retirement">
+                    <span class="nav-icon">🏦</span>
+                    <span>Retirement</span>
+                </a>
+                <a href="#" class="nav-item" data-page="social-security">
+                    <span class="nav-icon">🇺🇸</span>
+                    <span>Social Security</span>
+                </a>
+                <a href="#" class="nav-item" data-page="taxes">
+                    <span class="nav-icon">📝</span>
+                    <span>Taxes</span>
+                </a>
+                <a href="#" class="nav-item" data-page="ai-assistant">
+                    <span class="nav-icon">🤖</span>
+                    <span>AI Assistant</span>
+                </a>
+                <a href="#" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+            </div>
+            <button id="logoutBtn" class="logout-btn">Logout</button>
+        </nav>
 
-// Initialize app when user logs in
-window.addEventListener('userLoggedIn', () => {
-    console.log('User logged in - initializing app');
-    renderDashboard();
-});
+        <!-- Hamburger Menu (Mobile) -->
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
 
-console.log('✅ Retirement Planning App Loaded Successfully');
-console.log('✅ showPage function available');
+        <!-- Mobile Nav Menu -->
+        <div class="nav-menu">
+            <div class="nav-menu-header">
+                <h2>💰 Wealth</h2>
+                <button class="close-menu">✕</button>
+            </div>
+            <a href="#" class="nav-menu-item" data-page="dashboard">📊 Dashboard</a>
+            <a href="#" class="nav-menu-item" data-page="family">👨‍👩‍👧‍👦 Family</a>
+            <a href="#" class="nav-menu-item" data-page="income">💵 Income</a>
+            <a href="#" class="nav-menu-item" data-page="expenses">💳 Expenses</a>
+            <a href="#" class="nav-menu-item" data-page="investments">📈 Investments</a>
+            <a href="#" class="nav-menu-item" data-page="retirement">🏦 Retirement</a>
+            <a href="#" class="nav-menu-item" data-page="social-security">🇺🇸 Social Security</a>
+            <a href="#" class="nav-menu-item" data-page="taxes">📝 Taxes</a>
+            <a href="#" class="nav-menu-item" data-page="ai-assistant">🤖 AI Assistant</a>
+            <a href="#" class="nav-menu-item" data-page="settings">⚙️ Settings</a>
+            <div class="nav-menu-footer">
+                <button id="mobileLogoutBtn" class="logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="content"></div>
+        </main>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-nav">
+            <a href="#" class="mobile-nav-item" data-page="dashboard">
+                <span class="mobile-nav-icon">📊</span>
+                <span class="mobile-nav-label">Overview</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="investments">
+                <span class="mobile-nav-icon">📈</span>
+                <span class="mobile-nav-label">Invest</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="ai-assistant">
+                <span class="mobile-nav-icon">🤖</span>
+                <span class="mobile-nav-label">AI Help</span>
+            </a>
+            <a href="#" class="mobile-nav-item" data-page="expenses">
+                <span class="mobile-nav-icon">💳</span>
+                <span class="mobile-nav-label">Spend</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Firebase and App Scripts -->
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/utils.js"></script>
+    <script type="module" src="js/profile.js"></script>
+    <script type="module" src="js/familyMembers.js"></script>
+    <script type="module" src="js/income.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
+    <script type="module" src="js/expenses.js"></script>
+    <script type="module" src="js/investments.js"></script>
+    <script type="module" src="js/retirement401k.js"></script>
+    <script type="module" src="js/socialSecurity.js"></script>
+    <script type="module" src="js/taxProjections.js"></script>
+    <script type="module" src="js/aiAssistant.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
