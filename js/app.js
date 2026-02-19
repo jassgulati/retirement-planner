@@ -1,154 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wealth - Retirement Planning</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <!-- Auth Container -->
-    <div id="authContainer">
-        <div class="auth-box">
-            <h1>💰 Wealth</h1>
-            <p>Your Personal Retirement Planner</p>
-            
-            <div id="loginForm">
-                <h2>Login</h2>
-                <input type="email" id="loginEmail" placeholder="Email">
-                <input type="password" id="loginPassword" placeholder="Password">
-                <button id="loginBtn" class="primary-button">Login</button>
-                <p class="auth-toggle">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+// Main App Navigation and Routing
+console.log('📱 App.js loading...');
+
+// Import page initialization functions
+import { initDashboard } from './dashboard.js';
+import { initFamilyMembers } from './familyMembers.js';
+import { initIncome } from './income.js';
+import { initExpenses } from './expenses.js';
+import { initInvestments } from './investments.js';
+import { initRetirement401k } from './retirement401k.js';
+import { initSocialSecurity } from './socialSecurity.js';
+import { initTaxProjections } from './taxProjections.js';
+import { initProfile } from './profile.js';
+
+// Page routing map
+const routes = {
+    'dashboard': initDashboard,
+    'family': initFamilyMembers,
+    'income': initIncome,
+    'expenses': initExpenses,
+    'investments': initInvestments,
+    'retirement': initRetirement401k,
+    'social-security': initSocialSecurity,
+    'taxes': initTaxProjections,
+    'settings': initProfile
+};
+
+let currentPage = 'dashboard';
+
+// Navigate to a page
+function navigate(page) {
+    console.log('🧭 Navigating to:', page);
+    
+    if (!routes[page]) {
+        console.error('❌ Page not found:', page);
+        return;
+    }
+    
+    currentPage = page;
+    
+    // Update active nav items
+    document.querySelectorAll('.nav-item, .mobile-nav-item, .nav-menu-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    document.querySelectorAll(`[data-page="${page}"]`).forEach(item => {
+        item.classList.add('active');
+    });
+    
+    // Close mobile hamburger menu if open
+    const navMenu = document.querySelector('.nav-menu');
+    if (navMenu) {
+        navMenu.classList.remove('active');
+    }
+    
+    // Clear content and initialize the page
+    const content = document.getElementById('content');
+    if (content) {
+        content.innerHTML = '';
+    }
+    
+    // Initialize the page
+    try {
+        routes[page]();
+        console.log('✅ Page loaded:', page);
+    } catch (error) {
+        console.error('❌ Error loading page:', page, error);
+        content.innerHTML = `
+            <div class="card">
+                <h2>Error Loading Page</h2>
+                <p>There was an error loading this page. Please try again.</p>
             </div>
-            
-            <div id="signupForm" style="display: none;">
-                <h2>Sign Up</h2>
-                <input type="email" id="signupEmail" placeholder="Email">
-                <input type="password" id="signupPassword" placeholder="Password">
-                <button id="signupBtn" class="primary-button">Sign Up</button>
-                <p class="auth-toggle">Already have an account? <a href="#" id="showLogin">Login</a></p>
-            </div>
-        </div>
-    </div>
+        `;
+    }
+}
 
-    <!-- Main App Container -->
-    <div id="appContainer" style="display: none;">
-        <!-- Desktop Navigation -->
-        <nav class="desktop-nav">
-            <div class="nav-brand">💰 Wealth</div>
-            <div class="nav-items">
-                <a href="#" class="nav-item" data-page="dashboard">
-                    <span class="nav-icon">📊</span>
-                    <span>Overview</span>
-                </a>
-                <a href="#" class="nav-item" data-page="family">
-                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
-                    <span>Family</span>
-                </a>
-                <a href="#" class="nav-item" data-page="income">
-                    <span class="nav-icon">💵</span>
-                    <span>Income</span>
-                </a>
-                <a href="#" class="nav-item" data-page="expenses">
-                    <span class="nav-icon">💳</span>
-                    <span>Expenses</span>
-                </a>
-                <a href="#" class="nav-item" data-page="investments">
-                    <span class="nav-icon">📈</span>
-                    <span>Investments</span>
-                </a>
-                <a href="#" class="nav-item" data-page="retirement">
-                    <span class="nav-icon">🏦</span>
-                    <span>Retirement</span>
-                </a>
-                <a href="#" class="nav-item" data-page="social-security">
-                    <span class="nav-icon">🇺🇸</span>
-                    <span>Social Security</span>
-                </a>
-                <a href="#" class="nav-item" data-page="taxes">
-                    <span class="nav-icon">📝</span>
-                    <span>Taxes</span>
-                </a>
-                <a href="#" class="nav-item" data-page="ai-assistant">
-                    <span class="nav-icon">🤖</span>
-                    <span>AI Assistant</span>
-                </a>
-                <a href="#" class="nav-item" data-page="settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span>Settings</span>
-                </a>
-            </div>
-            <button id="logoutBtn" class="logout-btn">Logout</button>
-        </nav>
+// Setup navigation event listeners
+function setupNavigation() {
+    console.log('🎯 Setting up navigation...');
+    
+    // Desktop nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = item.dataset.page;
+            if (page) navigate(page);
+        });
+    });
+    
+    // Mobile bottom nav items
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = item.dataset.page;
+            if (page) navigate(page);
+        });
+    });
+    
+    // Hamburger menu items
+    document.querySelectorAll('.nav-menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const page = item.dataset.page;
+            if (page) navigate(page);
+        });
+    });
+    
+    // Hamburger menu toggle
+    const hamburger = document.querySelector('.hamburger');
+    const navMenu = document.querySelector('.nav-menu');
+    
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+            console.log('🍔 Hamburger menu toggled');
+        });
+    }
+    
+    // Close menu button
+    const closeMenu = document.querySelector('.close-menu');
+    if (closeMenu && navMenu) {
+        closeMenu.addEventListener('click', () => {
+            navMenu.classList.remove('active');
+            console.log('❌ Menu closed');
+        });
+    }
+    
+    // Logout buttons
+    const logoutBtn = document.getElementById('logoutBtn');
+    const mobileLogoutBtn = document.getElementById('mobileLogoutBtn');
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    if (mobileLogoutBtn) {
+        mobileLogoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    console.log('✅ Navigation setup complete');
+}
 
-        <!-- Hamburger Menu (Mobile) -->
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+// Handle logout
+async function handleLogout() {
+    console.log('👋 Logging out...');
+    try {
+        await firebase.auth().signOut();
+    } catch (error) {
+        console.error('❌ Logout error:', error);
+        alert('Error logging out. Please try again.');
+    }
+}
 
-        <!-- Mobile Nav Menu -->
-        <div class="nav-menu">
-            <div class="nav-menu-header">
-                <h2>💰 Wealth</h2>
-                <button class="close-menu">✕</button>
-            </div>
-            <a href="#" class="nav-menu-item" data-page="dashboard">📊 Dashboard</a>
-            <a href="#" class="nav-menu-item" data-page="family">👨‍👩‍👧‍👦 Family</a>
-            <a href="#" class="nav-menu-item" data-page="income">💵 Income</a>
-            <a href="#" class="nav-menu-item" data-page="expenses">💳 Expenses</a>
-            <a href="#" class="nav-menu-item" data-page="investments">📈 Investments</a>
-            <a href="#" class="nav-menu-item" data-page="retirement">🏦 Retirement</a>
-            <a href="#" class="nav-menu-item" data-page="social-security">🇺🇸 Social Security</a>
-            <a href="#" class="nav-menu-item" data-page="taxes">📝 Taxes</a>
-            <a href="#" class="nav-menu-item" data-page="ai-assistant">🤖 AI Assistant</a>
-            <a href="#" class="nav-menu-item" data-page="settings">⚙️ Settings</a>
-            <div class="nav-menu-footer">
-                <button id="mobileLogoutBtn" class="logout-btn">Logout</button>
-            </div>
-        </div>
+// Initialize app when user logs in
+function initializeApp() {
+    console.log('🚀 Initializing app...');
+    
+    // Setup navigation
+    setupNavigation();
+    
+    // Navigate to dashboard by default
+    navigate('dashboard');
+    
+    console.log('✅ App initialized');
+}
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div id="content"></div>
-        </main>
+// Listen for user login
+window.addEventListener('userLoggedIn', () => {
+    console.log('👤 User logged in event received');
+    
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+        initializeApp();
+    }, 100);
+});
 
-        <!-- Mobile Bottom Navigation -->
-        <nav class="mobile-nav">
-            <a href="#" class="mobile-nav-item" data-page="dashboard">
-                <span class="mobile-nav-icon">📊</span>
-                <span class="mobile-nav-label">Overview</span>
-            </a>
-            <a href="#" class="mobile-nav-item" data-page="investments">
-                <span class="mobile-nav-icon">📈</span>
-                <span class="mobile-nav-label">Invest</span>
-            </a>
-            <a href="#" class="mobile-nav-item" data-page="ai-assistant">
-                <span class="mobile-nav-icon">🤖</span>
-                <span class="mobile-nav-label">AI Help</span>
-            </a>
-            <a href="#" class="mobile-nav-item" data-page="expenses">
-                <span class="mobile-nav-icon">💳</span>
-                <span class="mobile-nav-label">Spend</span>
-            </a>
-        </nav>
-    </div>
+// If app container is already visible (user already logged in), initialize
+if (document.getElementById('appContainer')?.style.display !== 'none') {
+    console.log('👤 User already logged in, initializing...');
+    initializeApp();
+}
 
-    <!-- Firebase and App Scripts -->
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/auth.js"></script>
-    <script type="module" src="js/utils.js"></script>
-    <script type="module" src="js/profile.js"></script>
-    <script type="module" src="js/familyMembers.js"></script>
-    <script type="module" src="js/income.js"></script>
-    <script type="module" src="js/dashboard.js"></script>
-    <script type="module" src="js/expenses.js"></script>
-    <script type="module" src="js/investments.js"></script>
-    <script type="module" src="js/retirement401k.js"></script>
-    <script type="module" src="js/socialSecurity.js"></script>
-    <script type="module" src="js/taxProjections.js"></script>
-    <script type="module" src="js/aiAssistant.js"></script>
-    <script type="module" src="js/app.js"></script>
-</body>
-</html>
+console.log('✅ App.js loaded');
