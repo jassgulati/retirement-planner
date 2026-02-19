@@ -1,13 +1,9 @@
-// Authentication Module - FIXED
-import { initializeFirebase } from './config.js';
+// Authentication Module - FIXED with direct imports
+import { auth } from './config.js';
 
-let auth;
 let currentUser = null;
 
 export function initAuth() {
-    const { auth: firebaseAuth } = initializeFirebase();
-    auth = firebaseAuth;
-    
     console.log('🔐 Auth module initializing...');
     
     // Setup UI event listeners
