@@ -1,328 +1,264 @@
-// Family Members Module - ULTRA DEBUG VERSION
-import { initializeFirebase } from './config.js';
+// Family Members Module - FIXED VERSION
+import { database } from './config.js';
 import { getUserId } from './auth.js';
-import { calculateAge } from './utils.js';
 
-let database;
-export let familyMembers = [];
-let isSaving = false;
+let familyMembers = {};
 
+// This is called by app.js when navigating to the Family page
 export function initFamilyMembers() {
-    console.log('🔵 Initializing Family Members module');
-    const { database: db } = initializeFirebase();
-    database = db;
-    console.log('🔵 Database reference:', database ? 'OK' : 'MISSING');
+    console.log('👨‍👩‍👧‍👦 Initializing Family Members module...');
     
-    window.addEventListener('userLoggedIn', () => {
-        console.log('🔵 User logged in event received');
-        setTimeout(() => {
-            loadFamilyMembers();
-        }, 500);
-    });
+    // Render the page
+    renderFamilyPage();
+    
+    // Load family members from Firebase
+    loadFamilyMembers();
 }
 
-export function renderFamilyPage() {
-    console.log('🔵 Rendering Family page');
-    const container = document.getElementById('family');
+function renderFamilyPage() {
+    const container = document.getElementById('content');
     if (!container) {
-        console.error('❌ Family container not found!');
+        console.error('❌ Content container not found');
         return;
     }
     
     container.innerHTML = `
         <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 class="card-title" style="margin: 0;">Family Members</h3>
-                <button class="btn btn-primary" id="showAddFamilyBtn" style="padding: 8px 16px; font-size: 15px;">+ Add</button>
-            </div>
-            <div id="familyList"></div>
+            <h2 class="card-title">👨‍👩‍👧‍👦 Family Members</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Add your family members to track ages and link income sources.
+            </p>
+            <button id="addFamilyMemberBtn" class="btn btn-primary">
+                + Add Family Member
+            </button>
         </div>
         
-        <div id="addFamilyForm" class="card hidden">
-            <h3 class="card-title">Add Family Member</h3>
-            <form id="familyForm">
+        <div id="familyList"></div>
+        
+        <!-- Add/Edit Modal -->
+        <div id="familyModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+            <div class="card" style="width: 90%; max-width: 500px; margin: 20px;">
+                <h3 class="card-title">Add Family Member</h3>
+                
                 <div class="form-group">
                     <label class="form-label">Name</label>
-                    <input type="text" class="form-input" id="familyName" placeholder="Full name" autocomplete="off">
+                    <input type="text" class="form-input" id="memberName" placeholder="e.g., John Doe">
                 </div>
+                
                 <div class="form-group">
                     <label class="form-label">Relationship</label>
-                    <select class="form-select" id="familyRelationship">
+                    <select class="form-select" id="memberRelationship">
                         <option value="self">Self</option>
-                        <option value="spouse">Spouse/Partner</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="partner">Partner</option>
                         <option value="child">Child</option>
                         <option value="parent">Parent</option>
                         <option value="other">Other</option>
                     </select>
                 </div>
+                
                 <div class="form-group">
                     <label class="form-label">Birth Date</label>
-                    <input type="date" class="form-input" id="familyBirthDate">
+                    <input type="date" class="form-input" id="memberBirthDate">
                 </div>
-                <div style="display: flex; gap: 12px;">
-                    <button type="button" class="btn btn-primary" id="saveFamilyBtn" style="flex: 1;">Save</button>
-                    <button type="button" class="btn btn-secondary" id="cancelFamilyBtn">Cancel</button>
+                
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button id="saveFamilyMemberBtn" class="btn btn-primary" style="flex: 1;">
+                        Save
+                    </button>
+                    <button id="cancelFamilyMemberBtn" class="btn" style="flex: 1; background: #f5f5f7;">
+                        Cancel
+                    </button>
                 </div>
-                <div id="familyMessage" style="margin-top: 12px; padding: 12px; border-radius: 10px; display: none;"></div>
-            </form>
+            </div>
         </div>
     `;
     
-    document.getElementById('showAddFamilyBtn').onclick = showAddFamilyForm;
-    document.getElementById('saveFamilyBtn').onclick = saveFamilyMember;
-    document.getElementById('cancelFamilyBtn').onclick = hideAddFamilyForm;
+    // Setup event listeners
+    setupEventListeners();
     
-    console.log('🔵 Event listeners attached');
-    renderFamilyList();
+    console.log('✅ Family page rendered');
 }
 
-export async function loadFamilyMembers() {
-    const userId = getUserId();
-    console.log('🔵 loadFamilyMembers called, userId:', userId);
+function setupEventListeners() {
+    const addBtn = document.getElementById('addFamilyMemberBtn');
+    const saveBtn = document.getElementById('saveFamilyMemberBtn');
+    const cancelBtn = document.getElementById('cancelFamilyMemberBtn');
     
-    if (!userId) {
-        console.log('⚠️ No user ID yet');
+    if (addBtn) {
+        addBtn.addEventListener('click', showAddModal);
+    }
+    
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveFamilyMember);
+    }
+    
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', hideModal);
+    }
+}
+
+function showAddModal() {
+    const modal = document.getElementById('familyModal');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function hideModal() {
+    const modal = document.getElementById('familyModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    
+    // Clear form
+    document.getElementById('memberName').value = '';
+    document.getElementById('memberRelationship').value = 'self';
+    document.getElementById('memberBirthDate').value = '';
+}
+
+async function saveFamilyMember() {
+    const name = document.getElementById('memberName').value.trim();
+    const relationship = document.getElementById('memberRelationship').value;
+    const birthDate = document.getElementById('memberBirthDate').value;
+    
+    if (!name) {
+        alert('Please enter a name');
         return;
     }
     
+    if (!birthDate) {
+        alert('Please enter a birth date');
+        return;
+    }
+    
+    const userId = getUserId();
+    if (!userId) {
+        alert('Please log in');
+        return;
+    }
+    
+    // Calculate age
+    const age = calculateAge(birthDate);
+    
+    const member = {
+        name,
+        relationship,
+        birthDate,
+        age,
+        createdAt: new Date().toISOString()
+    };
+    
     try {
-        console.log('🔵 Fetching from Firebase path: users/' + userId + '/familyMembers');
+        const memberId = 'fam_' + Date.now();
+        await database.ref(`users/${userId}/familyMembers/${memberId}`).set(member);
+        
+        console.log('✅ Family member saved');
+        hideModal();
+        loadFamilyMembers();
+    } catch (error) {
+        console.error('❌ Error saving family member:', error);
+        alert('Error saving family member');
+    }
+}
+
+async function loadFamilyMembers() {
+    const userId = getUserId();
+    if (!userId) return;
+    
+    console.log('📥 Loading family members...');
+    
+    try {
         const snapshot = await database.ref(`users/${userId}/familyMembers`).once('value');
-        console.log('🔵 Firebase snapshot exists:', snapshot.exists());
-        console.log('🔵 Number of children:', snapshot.numChildren());
+        familyMembers = snapshot.val() || {};
         
-        familyMembers = [];
-        snapshot.forEach(child => {
-            const member = {
-                id: child.key,
-                ...child.val()
-            };
-            console.log('🔵 Found member:', member);
-            familyMembers.push(member);
-        });
-        
-        console.log('✅ Loaded', familyMembers.length, 'family members');
-        renderFamilyList();
+        console.log('✅ Loaded', Object.keys(familyMembers).length, 'family members');
+        displayFamilyMembers();
     } catch (error) {
         console.error('❌ Error loading family members:', error);
     }
 }
 
-function showAddFamilyForm() {
-    console.log('🔵 showAddFamilyForm called');
-    const form = document.getElementById('addFamilyForm');
-    if (form) {
-        form.classList.remove('hidden');
-        document.getElementById('familyName').focus();
-    }
-}
-
-function hideAddFamilyForm() {
-    console.log('🔵 hideAddFamilyForm called');
-    const form = document.getElementById('addFamilyForm');
-    if (form) {
-        form.classList.add('hidden');
-        document.getElementById('familyForm').reset();
-    }
-    const message = document.getElementById('familyMessage');
-    if (message) message.style.display = 'none';
-}
-
-async function saveFamilyMember() {
-    console.log('🟢 ========== SAVE CLICKED ==========');
-    
-    if (isSaving) {
-        console.log('⚠️ Already saving, aborting');
-        return;
-    }
-    
-    isSaving = true;
-    const saveBtn = document.getElementById('saveFamilyBtn');
-    if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.textContent = 'Saving...';
-    }
-    
-    try {
-        const name = document.getElementById('familyName').value.trim();
-        const relationship = document.getElementById('familyRelationship').value;
-        const birthDate = document.getElementById('familyBirthDate').value;
-        
-        console.log('🟢 Form data:', { name, relationship, birthDate });
-        
-        if (!name) {
-            console.log('❌ Validation failed: no name');
-            showMessage('Please enter a name', 'error');
-            return;
-        }
-        
-        if (!birthDate) {
-            console.log('❌ Validation failed: no birth date');
-            showMessage('Please enter a birth date', 'error');
-            return;
-        }
-        
-        const userId = getUserId();
-        console.log('🟢 User ID:', userId);
-        
-        if (!userId) {
-            console.log('❌ No user ID - not logged in');
-            showMessage('Please log in first', 'error');
-            return;
-        }
-        
-        const member = {
-            name,
-            relationship,
-            birthDate,
-            age: calculateAge(birthDate),
-            createdAt: new Date().toISOString()
-        };
-        
-        const memberId = 'fam_' + Date.now();
-        const path = `users/${userId}/familyMembers/${memberId}`;
-        
-        console.log('🟢 Saving to path:', path);
-        console.log('🟢 Member data:', member);
-        console.log('🟢 Database ref exists:', database ? 'YES' : 'NO');
-        
-        // Try the save
-        const ref = database.ref(path);
-        console.log('🟢 Created reference');
-        
-        await ref.set(member);
-        console.log('✅✅✅ SAVED TO FIREBASE SUCCESSFULLY! ✅✅✅');
-        
-        showMessage('✓ Saved successfully!', 'success');
-        
-        // Wait a moment then reload
-        console.log('🟢 Waiting 1 second before reload...');
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        console.log('🟢 Reloading family list...');
-        await loadFamilyMembers();
-        
-        console.log('🟢 Hiding form...');
-        setTimeout(() => {
-            hideAddFamilyForm();
-        }, 1500);
-        
-    } catch (error) {
-        console.error('❌❌❌ ERROR SAVING:', error);
-        console.error('Error name:', error.name);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
-        showMessage('Error: ' + error.message, 'error');
-    } finally {
-        isSaving = false;
-        const saveBtn = document.getElementById('saveFamilyBtn');
-        if (saveBtn) {
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save';
-        }
-    }
-}
-
-window.deleteFamilyMember = async function(memberId) {
-    if (!confirm('Delete this family member?')) return;
-    
-    const userId = getUserId();
-    if (!userId) return;
-    
-    try {
-        console.log('🔵 Deleting:', memberId);
-        await database.ref(`users/${userId}/familyMembers/${memberId}`).remove();
-        console.log('✅ Deleted successfully');
-        await loadFamilyMembers();
-    } catch (error) {
-        console.error('❌ Error deleting:', error);
-    }
-};
-
-function renderFamilyList() {
+function displayFamilyMembers() {
     const container = document.getElementById('familyList');
     if (!container) {
         console.error('❌ familyList container not found');
         return;
     }
     
-    console.log('🔵 Rendering', familyMembers.length, 'family members');
+    const members = Object.entries(familyMembers);
     
-    if (familyMembers.length === 0) {
+    if (members.length === 0) {
         container.innerHTML = `
-            <div style="text-align: center; padding: 40px 20px; color: var(--label-tertiary);">
-                <div style="font-size: 48px; margin-bottom: 16px;">👥</div>
-                <p style="font-size: 17px; margin-bottom: 8px;">No family members yet</p>
-                <p style="font-size: 15px;">Tap "+ Add" to add your first family member</p>
+            <div class="card" style="text-align: center; padding: 40px;">
+                <p style="color: #666; font-size: 16px;">No family members yet. Add your first one!</p>
             </div>
         `;
         return;
     }
     
-    const isMobile = window.innerWidth < 768;
-    
-    if (isMobile) {
-        let html = '<div style="display: grid; gap: 12px;">';
-        familyMembers.forEach(member => {
-            html += `
-                <div style="background: var(--fill-quaternary); padding: 16px; border-radius: 12px; border: 0.5px solid var(--separator);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
-                        <div>
-                            <div style="font-size: 17px; font-weight: 600; color: var(--label-primary);">${member.name}</div>
-                            <div style="font-size: 15px; color: var(--label-secondary); text-transform: capitalize;">${member.relationship}</div>
-                        </div>
-                        <button onclick="window.deleteFamilyMember('${member.id}')" 
-                            style="background: rgba(255, 59, 48, 0.12); color: var(--apple-red); border: none; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
-                            Delete
-                        </button>
-                    </div>
-                    <div style="font-size: 15px; color: var(--label-secondary);">
-                        Age: ${calculateAge(member.birthDate)} • Born: ${new Date(member.birthDate).toLocaleDateString()}
+    container.innerHTML = members.map(([id, member]) => `
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div style="flex: 1;">
+                    <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">
+                        ${member.name}
+                    </h3>
+                    <div style="display: flex; flex-wrap: wrap; gap: 12px; color: #666; font-size: 15px;">
+                        <span>${member.relationship}</span>
+                        <span>•</span>
+                        <span>Age ${member.age}</span>
+                        <span>•</span>
+                        <span>${formatDate(member.birthDate)}</span>
                     </div>
                 </div>
-            `;
-        });
-        html += '</div>';
-        container.innerHTML = html;
-    } else {
-        let html = '<div class="table-container"><table>';
-        html += '<thead><tr><th>Name</th><th>Relationship</th><th>Age</th><th>Birth Date</th><th>Actions</th></tr></thead><tbody>';
-        
-        familyMembers.forEach(member => {
-            html += `<tr>
-                <td style="font-weight: 600;">${member.name}</td>
-                <td style="text-transform: capitalize;">${member.relationship}</td>
-                <td>${calculateAge(member.birthDate)}</td>
-                <td>${new Date(member.birthDate).toLocaleDateString()}</td>
-                <td>
-                    <button onclick="window.deleteFamilyMember('${member.id}')" class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;">
-                        Delete
-                    </button>
-                </td>
-            </tr>`;
-        });
-        
-        html += '</tbody></table></div>';
-        container.innerHTML = html;
-    }
+                <button onclick="deleteFamilyMember('${id}')" class="btn" style="background: #ff3b30; color: white; padding: 8px 16px;">
+                    Delete
+                </button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function showMessage(text, type) {
-    console.log('🔵 Showing message:', text, type);
-    const message = document.getElementById('familyMessage');
-    if (!message) return;
+function calculateAge(birthDate) {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
     
-    message.textContent = text;
-    message.style.display = 'block';
-    
-    if (type === 'success') {
-        message.style.background = 'rgba(52, 199, 89, 0.12)';
-        message.style.color = 'var(--apple-green)';
-    } else {
-        message.style.background = 'rgba(255, 59, 48, 0.12)';
-        message.style.color = 'var(--apple-red)';
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
     }
+    
+    return age;
 }
 
-console.log('✅✅✅ Family Members module loaded ✅✅✅');
-initFamilyMembers();
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+// Make delete function global so it can be called from HTML
+window.deleteFamilyMember = async function(memberId) {
+    if (!confirm('Are you sure you want to delete this family member?')) {
+        return;
+    }
+    
+    const userId = getUserId();
+    if (!userId) return;
+    
+    try {
+        await database.ref(`users/${userId}/familyMembers/${memberId}`).remove();
+        console.log('✅ Family member deleted');
+        loadFamilyMembers();
+    } catch (error) {
+        console.error('❌ Error deleting family member:', error);
+        alert('Error deleting family member');
+    }
+};
+
+console.log('✅ Family Members module loaded');
