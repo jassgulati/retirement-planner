@@ -15,17 +15,24 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// Export auth and database directly
-export const auth = firebase.auth();
-export const database = firebase.database();
+// Create auth and database instances
+const firebaseAuth = firebase.auth();
+const firebaseDatabase = firebase.database();
 
-// Initialize function for backwards compatibility
+// Export directly (for modules that import { auth, database })
+export const auth = firebaseAuth;
+export const database = firebaseDatabase;
+
+// Export via function (for modules that use initializeFirebase())
 export function initializeFirebase() {
     return {
-        auth: auth,
-        database: database
+        auth: firebaseAuth,
+        database: firebaseDatabase
     };
 }
+
+// Also export the config itself
+export { firebaseConfig };
 
 // Projection Rates - User Selectable
 export const PROJECTION_RATES = {
