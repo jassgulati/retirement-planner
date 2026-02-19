@@ -1,255 +1,336 @@
-// User Profile/Settings Module
+// User Profile/Settings Module - FIXED VERSION
 import { initializeFirebase } from './config.js';
 import { getUserId } from './auth.js';
 
-let database;
+const { database } = initializeFirebase();
+
 let userProfile = {
     taxFilingStatus: 'married_joint',
     projectionMode: 'average',
     currentAge: 35,
     retirementAge: 67,
     lifeExpectancy: 90,
-    state: 'CA' // Default to California
+    state: 'CA'
 };
 
+// This is the function app.js calls
 export function initProfile() {
-    const { database: db } = initializeFirebase();
-    database = db;
+    console.log('🔧 Initializing Profile module...');
     
+    // Load profile data when user logs in
     window.addEventListener('userLoggedIn', () => {
+        console.log('👤 User logged in, loading profile...');
         loadProfile();
     });
+    
+    // Render the settings page
+    renderProfilePage();
 }
 
 export function getUserProfile() {
     return userProfile;
 }
 
-export function renderProfilePage() {
-    const container = document.getElementById('profile');
-    if (!container) return;
+function renderProfilePage() {
+    const container = document.getElementById('content');
+    if (!container) {
+        console.error('❌ Content container not found');
+        return;
+    }
+    
+    console.log('📄 Rendering profile page with data:', userProfile);
     
     container.innerHTML = `
-        <div class="card">
-            <h2 class="card-title">Your Profile & Settings</h2>
-            <p style="font-size: 15px; color: var(--label-secondary); margin-bottom: 24px;">
-                These settings affect your tax calculations, retirement projections, and Social Security estimates.
-            </p>
-        </div>
-        
-        <!-- Personal Info -->
-        <div class="card">
-            <h3 class="card-title">Personal Information</h3>
-            
-            <div class="form-group">
-                <label class="form-label">Current Age</label>
-                <input type="number" class="form-input" id="currentAge" value="${userProfile.currentAge}" min="18" max="100">
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">State of Residence</label>
-                <select class="form-select" id="userState">
-                    <option value="AL" ${userProfile.state === 'AL' ? 'selected' : ''}>Alabama</option>
-                    <option value="AK" ${userProfile.state === 'AK' ? 'selected' : ''}>Alaska</option>
-                    <option value="AZ" ${userProfile.state === 'AZ' ? 'selected' : ''}>Arizona</option>
-                    <option value="AR" ${userProfile.state === 'AR' ? 'selected' : ''}>Arkansas</option>
-                    <option value="CA" ${userProfile.state === 'CA' ? 'selected' : ''}>California</option>
-                    <option value="CO" ${userProfile.state === 'CO' ? 'selected' : ''}>Colorado</option>
-                    <option value="CT" ${userProfile.state === 'CT' ? 'selected' : ''}>Connecticut</option>
-                    <option value="DE" ${userProfile.state === 'DE' ? 'selected' : ''}>Delaware</option>
-                    <option value="FL" ${userProfile.state === 'FL' ? 'selected' : ''}>Florida (No State Tax)</option>
-                    <option value="GA" ${userProfile.state === 'GA' ? 'selected' : ''}>Georgia</option>
-                    <option value="HI" ${userProfile.state === 'HI' ? 'selected' : ''}>Hawaii</option>
-                    <option value="ID" ${userProfile.state === 'ID' ? 'selected' : ''}>Idaho</option>
-                    <option value="IL" ${userProfile.state === 'IL' ? 'selected' : ''}>Illinois</option>
-                    <option value="IN" ${userProfile.state === 'IN' ? 'selected' : ''}>Indiana</option>
-                    <option value="IA" ${userProfile.state === 'IA' ? 'selected' : ''}>Iowa</option>
-                    <option value="KS" ${userProfile.state === 'KS' ? 'selected' : ''}>Kansas</option>
-                    <option value="KY" ${userProfile.state === 'KY' ? 'selected' : ''}>Kentucky</option>
-                    <option value="LA" ${userProfile.state === 'LA' ? 'selected' : ''}>Louisiana</option>
-                    <option value="ME" ${userProfile.state === 'ME' ? 'selected' : ''}>Maine</option>
-                    <option value="MD" ${userProfile.state === 'MD' ? 'selected' : ''}>Maryland</option>
-                    <option value="MA" ${userProfile.state === 'MA' ? 'selected' : ''}>Massachusetts</option>
-                    <option value="MI" ${userProfile.state === 'MI' ? 'selected' : ''}>Michigan</option>
-                    <option value="MN" ${userProfile.state === 'MN' ? 'selected' : ''}>Minnesota</option>
-                    <option value="MS" ${userProfile.state === 'MS' ? 'selected' : ''}>Mississippi</option>
-                    <option value="MO" ${userProfile.state === 'MO' ? 'selected' : ''}>Missouri</option>
-                    <option value="MT" ${userProfile.state === 'MT' ? 'selected' : ''}>Montana</option>
-                    <option value="NE" ${userProfile.state === 'NE' ? 'selected' : ''}>Nebraska</option>
-                    <option value="NV" ${userProfile.state === 'NV' ? 'selected' : ''}>Nevada (No State Tax)</option>
-                    <option value="NH" ${userProfile.state === 'NH' ? 'selected' : ''}>New Hampshire</option>
-                    <option value="NJ" ${userProfile.state === 'NJ' ? 'selected' : ''}>New Jersey</option>
-                    <option value="NM" ${userProfile.state === 'NM' ? 'selected' : ''}>New Mexico</option>
-                    <option value="NY" ${userProfile.state === 'NY' ? 'selected' : ''}>New York</option>
-                    <option value="NC" ${userProfile.state === 'NC' ? 'selected' : ''}>North Carolina</option>
-                    <option value="ND" ${userProfile.state === 'ND' ? 'selected' : ''}>North Dakota</option>
-                    <option value="OH" ${userProfile.state === 'OH' ? 'selected' : ''}>Ohio</option>
-                    <option value="OK" ${userProfile.state === 'OK' ? 'selected' : ''}>Oklahoma</option>
-                    <option value="OR" ${userProfile.state === 'OR' ? 'selected' : ''}>Oregon</option>
-                    <option value="PA" ${userProfile.state === 'PA' ? 'selected' : ''}>Pennsylvania</option>
-                    <option value="RI" ${userProfile.state === 'RI' ? 'selected' : ''}>Rhode Island</option>
-                    <option value="SC" ${userProfile.state === 'SC' ? 'selected' : ''}>South Carolina</option>
-                    <option value="SD" ${userProfile.state === 'SD' ? 'selected' : ''}>South Dakota (No State Tax)</option>
-                    <option value="TN" ${userProfile.state === 'TN' ? 'selected' : ''}>Tennessee (No State Tax)</option>
-                    <option value="TX" ${userProfile.state === 'TX' ? 'selected' : ''}>Texas (No State Tax)</option>
-                    <option value="UT" ${userProfile.state === 'UT' ? 'selected' : ''}>Utah</option>
-                    <option value="VT" ${userProfile.state === 'VT' ? 'selected' : ''}>Vermont</option>
-                    <option value="VA" ${userProfile.state === 'VA' ? 'selected' : ''}>Virginia</option>
-                    <option value="WA" ${userProfile.state === 'WA' ? 'selected' : ''}>Washington (No State Tax)</option>
-                    <option value="WV" ${userProfile.state === 'WV' ? 'selected' : ''}>West Virginia</option>
-                    <option value="WI" ${userProfile.state === 'WI' ? 'selected' : ''}>Wisconsin</option>
-                    <option value="WY" ${userProfile.state === 'WY' ? 'selected' : ''}>Wyoming (No State Tax)</option>
-                </select>
-                <p style="font-size: 13px; color: var(--label-tertiary); margin-top: 4px;">
-                    Used to estimate state income tax. ${getStateTaxInfo(userProfile.state)}
+        <div style="max-width: 800px; margin: 0 auto; padding: 20px;">
+            <div class="card">
+                <h2 class="card-title">⚙️ Settings</h2>
+                <p style="font-size: 15px; color: #666; margin-bottom: 24px;">
+                    These settings affect your tax calculations, retirement projections, and Social Security estimates.
                 </p>
             </div>
-        </div>
-        
-        <!-- Tax Settings -->
-        <div class="card">
-            <h3 class="card-title">Tax Settings</h3>
             
-            <div class="form-group">
-                <label class="form-label">Tax Filing Status</label>
-                <select class="form-select" id="taxFilingStatus">
-                    <option value="single" ${userProfile.taxFilingStatus === 'single' ? 'selected' : ''}>Single</option>
-                    <option value="married_joint" ${userProfile.taxFilingStatus === 'married_joint' ? 'selected' : ''}>Married Filing Jointly</option>
-                    <option value="married_separate" ${userProfile.taxFilingStatus === 'married_separate' ? 'selected' : ''}>Married Filing Separately</option>
-                    <option value="head_of_household" ${userProfile.taxFilingStatus === 'head_of_household' ? 'selected' : ''}>Head of Household</option>
-                </select>
-                <p style="font-size: 13px; color: var(--label-tertiary); margin-top: 4px;">
-                    Affects federal tax brackets and standard deduction
-                </p>
-            </div>
-        </div>
-        
-        <!-- Investment Projections -->
-        <div class="card">
-            <h3 class="card-title">Investment Projection Mode</h3>
-            <p style="font-size: 15px; color: var(--label-secondary); margin-bottom: 16px;">
-                Choose how optimistic you want your retirement projections to be.
-            </p>
-            
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--fill-tertiary); border-radius: 12px; cursor: pointer; border: 2px solid transparent;" 
-                    class="projection-option ${userProfile.projectionMode === 'conservative' ? 'selected' : ''}">
-                    <input type="radio" name="projectionMode" value="conservative" ${userProfile.projectionMode === 'conservative' ? 'checked' : ''} 
-                        style="width: 20px; height: 20px; cursor: pointer;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Conservative (4%)</div>
-                        <div style="font-size: 15px; color: var(--label-secondary);">Bond-heavy portfolio, minimal risk</div>
-                    </div>
-                </label>
+            <!-- Personal Info -->
+            <div class="card">
+                <h3 class="card-title">Personal Information</h3>
                 
-                <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--fill-tertiary); border-radius: 12px; cursor: pointer; border: 2px solid transparent;" 
-                    class="projection-option ${userProfile.projectionMode === 'average' ? 'selected' : ''}">
-                    <input type="radio" name="projectionMode" value="average" ${userProfile.projectionMode === 'average' ? 'checked' : ''} 
-                        style="width: 20px; height: 20px; cursor: pointer;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Average (10%)</div>
-                        <div style="font-size: 15px; color: var(--label-secondary);">S&P 500 historical 10-year average</div>
-                    </div>
-                </label>
-                
-                <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: var(--fill-tertiary); border-radius: 12px; cursor: pointer; border: 2px solid transparent;" 
-                    class="projection-option ${userProfile.projectionMode === 'optimistic' ? 'selected' : ''}">
-                    <input type="radio" name="projectionMode" value="optimistic" ${userProfile.projectionMode === 'optimistic' ? 'checked' : ''} 
-                        style="width: 20px; height: 20px; cursor: pointer;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Optimistic (13%)</div>
-                        <div style="font-size: 15px; color: var(--label-secondary);">Aggressive growth portfolio</div>
-                    </div>
-                </label>
-            </div>
-        </div>
-        
-        <!-- Retirement Planning -->
-        <div class="card">
-            <h3 class="card-title">Retirement Planning</h3>
-            
-            <div class="form-group">
-                <label class="form-label">Planned Retirement Age</label>
-                <input type="number" class="form-input" id="retirementAge" value="${userProfile.retirementAge}" min="55" max="75">
-                <p style="font-size: 13px; color: var(--label-tertiary); margin-top: 4px;">
-                    Used for Social Security benefit calculations and retirement projections
-                </p>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Life Expectancy</label>
-                <input type="number" class="form-input" id="lifeExpectancy" value="${userProfile.lifeExpectancy}" min="70" max="120">
-                <p style="font-size: 13px; color: var(--label-tertiary); margin-top: 4px;">
-                    How long you expect to live (for retirement planning)
-                </p>
-            </div>
-            
-            <div style="background: rgba(0, 122, 255, 0.1); padding: 16px; border-radius: 12px; margin-top: 16px;">
-                <div style="font-size: 15px; color: var(--label-secondary); margin-bottom: 8px;">
-                    <strong>Years until retirement:</strong> ${Math.max(0, userProfile.retirementAge - userProfile.currentAge)} years
+                <div class="form-group">
+                    <label class="form-label">Current Age</label>
+                    <input type="number" class="form-input" id="currentAge" value="${userProfile.currentAge}" min="18" max="100">
+                    <p style="font-size: 13px; color: #999; margin-top: 4px;">
+                        Your current age in years
+                    </p>
                 </div>
-                <div style="font-size: 15px; color: var(--label-secondary);">
-                    <strong>Years in retirement:</strong> ${Math.max(0, userProfile.lifeExpectancy - userProfile.retirementAge)} years
+                
+                <div class="form-group">
+                    <label class="form-label">State of Residence</label>
+                    <select class="form-select" id="userState">
+                        ${generateStateOptions()}
+                    </select>
+                    <p style="font-size: 13px; color: #999; margin-top: 4px;">
+                        Used to estimate state income tax. ${getStateTaxInfo(userProfile.state)}
+                    </p>
                 </div>
             </div>
-        </div>
-        
-        <!-- Save Button -->
-        <div class="card" style="text-align: center;">
-            <button class="btn btn-primary" onclick="window.saveProfile()" style="padding: 14px 32px; font-size: 17px;">
-                💾 Save Settings
-            </button>
-            <p style="font-size: 13px; color: var(--label-tertiary); margin-top: 12px;">
-                Changes will update all calculations and projections
-            </p>
+            
+            <!-- Tax Settings -->
+            <div class="card">
+                <h3 class="card-title">Tax Settings</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Tax Filing Status</label>
+                    <select class="form-select" id="taxFilingStatus">
+                        <option value="single" ${userProfile.taxFilingStatus === 'single' ? 'selected' : ''}>Single</option>
+                        <option value="married_joint" ${userProfile.taxFilingStatus === 'married_joint' ? 'selected' : ''}>Married Filing Jointly</option>
+                        <option value="married_separate" ${userProfile.taxFilingStatus === 'married_separate' ? 'selected' : ''}>Married Filing Separately</option>
+                        <option value="head_of_household" ${userProfile.taxFilingStatus === 'head_of_household' ? 'selected' : ''}>Head of Household</option>
+                    </select>
+                    <p style="font-size: 13px; color: #999; margin-top: 4px;">
+                        Affects federal tax brackets and standard deduction
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Investment Projections -->
+            <div class="card">
+                <h3 class="card-title">Investment Projection Mode</h3>
+                <p style="font-size: 15px; color: #666; margin-bottom: 16px;">
+                    Choose how optimistic you want your retirement projections to be.
+                </p>
+                
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8f9fa; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" 
+                        class="projection-option ${userProfile.projectionMode === 'conservative' ? 'selected' : ''}" data-mode="conservative">
+                        <input type="radio" name="projectionMode" value="conservative" ${userProfile.projectionMode === 'conservative' ? 'checked' : ''} 
+                            style="width: 20px; height: 20px; cursor: pointer;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Conservative (4%)</div>
+                            <div style="font-size: 15px; color: #666;">Bond-heavy portfolio, minimal risk</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8f9fa; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" 
+                        class="projection-option ${userProfile.projectionMode === 'average' ? 'selected' : ''}" data-mode="average">
+                        <input type="radio" name="projectionMode" value="average" ${userProfile.projectionMode === 'average' ? 'checked' : ''} 
+                            style="width: 20px; height: 20px; cursor: pointer;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Average (10%)</div>
+                            <div style="font-size: 15px; color: #666;">S&P 500 historical 10-year average</div>
+                        </div>
+                    </label>
+                    
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 16px; background: #f8f9fa; border-radius: 12px; cursor: pointer; border: 2px solid transparent;" 
+                        class="projection-option ${userProfile.projectionMode === 'optimistic' ? 'selected' : ''}" data-mode="optimistic">
+                        <input type="radio" name="projectionMode" value="optimistic" ${userProfile.projectionMode === 'optimistic' ? 'checked' : ''} 
+                            style="width: 20px; height: 20px; cursor: pointer;">
+                        <div style="flex: 1;">
+                            <div style="font-size: 17px; font-weight: 600; margin-bottom: 4px;">Optimistic (13%)</div>
+                            <div style="font-size: 15px; color: #666;">Aggressive growth portfolio</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Retirement Planning -->
+            <div class="card">
+                <h3 class="card-title">Retirement Planning</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">Planned Retirement Age</label>
+                    <input type="number" class="form-input" id="retirementAge" value="${userProfile.retirementAge}" min="55" max="75">
+                    <p style="font-size: 13px; color: #999; margin-top: 4px;">
+                        Used for Social Security benefit calculations and retirement projections
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Life Expectancy</label>
+                    <input type="number" class="form-input" id="lifeExpectancy" value="${userProfile.lifeExpectancy}" min="70" max="120">
+                    <p style="font-size: 13px; color: #999; margin-top: 4px;">
+                        How long you expect to live (for retirement planning)
+                    </p>
+                </div>
+                
+                <div style="background: rgba(0, 122, 255, 0.1); padding: 16px; border-radius: 12px; margin-top: 16px;">
+                    <div style="font-size: 15px; color: #666; margin-bottom: 8px;">
+                        <strong>Years until retirement:</strong> ${Math.max(0, userProfile.retirementAge - userProfile.currentAge)} years
+                    </div>
+                    <div style="font-size: 15px; color: #666;">
+                        <strong>Years in retirement:</strong> ${Math.max(0, userProfile.lifeExpectancy - userProfile.retirementAge)} years
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Save Button -->
+            <div class="card" style="text-align: center;">
+                <button id="saveProfileBtn" class="btn btn-primary" style="padding: 14px 32px; font-size: 17px;">
+                    💾 Save Settings
+                </button>
+                <p style="font-size: 13px; color: #999; margin-top: 12px;">
+                    Changes will update all calculations and projections
+                </p>
+            </div>
         </div>
     `;
     
-    // Add radio button styling
+    // Add styles for projection options
+    addProjectionStyles();
+    
+    // Setup event listeners AFTER rendering
+    setupEventListeners();
+    
+    console.log('✅ Profile page rendered successfully');
+}
+
+function generateStateOptions() {
+    const states = [
+        { code: 'AL', name: 'Alabama' },
+        { code: 'AK', name: 'Alaska' },
+        { code: 'AZ', name: 'Arizona' },
+        { code: 'AR', name: 'Arkansas' },
+        { code: 'CA', name: 'California' },
+        { code: 'CO', name: 'Colorado' },
+        { code: 'CT', name: 'Connecticut' },
+        { code: 'DE', name: 'Delaware' },
+        { code: 'FL', name: 'Florida (No State Tax)' },
+        { code: 'GA', name: 'Georgia' },
+        { code: 'HI', name: 'Hawaii' },
+        { code: 'ID', name: 'Idaho' },
+        { code: 'IL', name: 'Illinois' },
+        { code: 'IN', name: 'Indiana' },
+        { code: 'IA', name: 'Iowa' },
+        { code: 'KS', name: 'Kansas' },
+        { code: 'KY', name: 'Kentucky' },
+        { code: 'LA', name: 'Louisiana' },
+        { code: 'ME', name: 'Maine' },
+        { code: 'MD', name: 'Maryland' },
+        { code: 'MA', name: 'Massachusetts' },
+        { code: 'MI', name: 'Michigan' },
+        { code: 'MN', name: 'Minnesota' },
+        { code: 'MS', name: 'Mississippi' },
+        { code: 'MO', name: 'Missouri' },
+        { code: 'MT', name: 'Montana' },
+        { code: 'NE', name: 'Nebraska' },
+        { code: 'NV', name: 'Nevada (No State Tax)' },
+        { code: 'NH', name: 'New Hampshire' },
+        { code: 'NJ', name: 'New Jersey' },
+        { code: 'NM', name: 'New Mexico' },
+        { code: 'NY', name: 'New York' },
+        { code: 'NC', name: 'North Carolina' },
+        { code: 'ND', name: 'North Dakota' },
+        { code: 'OH', name: 'Ohio' },
+        { code: 'OK', name: 'Oklahoma' },
+        { code: 'OR', name: 'Oregon' },
+        { code: 'PA', name: 'Pennsylvania' },
+        { code: 'RI', name: 'Rhode Island' },
+        { code: 'SC', name: 'South Carolina' },
+        { code: 'SD', name: 'South Dakota (No State Tax)' },
+        { code: 'TN', name: 'Tennessee (No State Tax)' },
+        { code: 'TX', name: 'Texas (No State Tax)' },
+        { code: 'UT', name: 'Utah' },
+        { code: 'VT', name: 'Vermont' },
+        { code: 'VA', name: 'Virginia' },
+        { code: 'WA', name: 'Washington (No State Tax)' },
+        { code: 'WV', name: 'West Virginia' },
+        { code: 'WI', name: 'Wisconsin' },
+        { code: 'WY', name: 'Wyoming (No State Tax)' }
+    ];
+    
+    return states.map(state => 
+        `<option value="${state.code}" ${userProfile.state === state.code ? 'selected' : ''}>${state.name}</option>`
+    ).join('');
+}
+
+function addProjectionStyles() {
+    if (document.getElementById('projectionStyles')) return;
+    
     const style = document.createElement('style');
+    style.id = 'projectionStyles';
     style.textContent = `
         .projection-option.selected {
             background: rgba(0, 122, 255, 0.1) !important;
-            border-color: var(--apple-blue) !important;
+            border-color: #007AFF !important;
         }
         .projection-option input[type="radio"] {
-            accent-color: var(--apple-blue);
+            accent-color: #007AFF;
+        }
+        .projection-option:hover {
+            background: rgba(0, 122, 255, 0.05) !important;
         }
     `;
     document.head.appendChild(style);
+}
+
+function setupEventListeners() {
+    console.log('🎯 Setting up event listeners...');
     
-    // Add event listeners for radio buttons
-    document.querySelectorAll('input[name="projectionMode"]').forEach(radio => {
+    // Radio button selection styling
+    const radioInputs = document.querySelectorAll('input[name="projectionMode"]');
+    radioInputs.forEach(radio => {
         radio.addEventListener('change', () => {
-            document.querySelectorAll('.projection-option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.projection-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
             radio.closest('.projection-option').classList.add('selected');
         });
     });
+    
+    // Save button
+    const saveBtn = document.getElementById('saveProfileBtn');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveProfile);
+        console.log('✅ Save button listener attached');
+    } else {
+        console.error('❌ Save button not found!');
+    }
 }
 
 async function loadProfile() {
     const userId = getUserId();
-    if (!userId) return;
+    if (!userId) {
+        console.log('⚠️ No user ID, skipping profile load');
+        return;
+    }
     
     try {
+        console.log('📥 Loading profile for user:', userId);
         const snapshot = await database.ref(`users/${userId}/profile`).once('value');
+        
         if (snapshot.exists()) {
-            userProfile = { ...userProfile, ...snapshot.val() };
+            const loadedProfile = snapshot.val();
+            userProfile = { ...userProfile, ...loadedProfile };
+            console.log('✅ Profile loaded:', userProfile);
+            
+            // Re-render if we're on the settings page
+            if (document.getElementById('currentAge')) {
+                renderProfilePage();
+            }
+        } else {
+            console.log('ℹ️ No saved profile found, using defaults');
         }
         
         window.dispatchEvent(new CustomEvent('profileLoaded', { detail: { profile: userProfile } }));
     } catch (error) {
-        console.error('Error loading profile:', error);
+        console.error('❌ Error loading profile:', error);
     }
 }
 
-window.saveProfile = async function() {
-    const currentAge = parseInt(document.getElementById('currentAge').value);
-    const state = document.getElementById('userState').value;
-    const taxFilingStatus = document.getElementById('taxFilingStatus').value;
-    const projectionMode = document.querySelector('input[name="projectionMode"]:checked').value;
-    const retirementAge = parseInt(document.getElementById('retirementAge').value);
-    const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy').value);
+async function saveProfile() {
+    console.log('💾 Save button clicked!');
+    
+    const currentAge = parseInt(document.getElementById('currentAge')?.value);
+    const state = document.getElementById('userState')?.value;
+    const taxFilingStatus = document.getElementById('taxFilingStatus')?.value;
+    const projectionModeRadio = document.querySelector('input[name="projectionMode"]:checked');
+    const projectionMode = projectionModeRadio?.value;
+    const retirementAge = parseInt(document.getElementById('retirementAge')?.value);
+    const lifeExpectancy = parseInt(document.getElementById('lifeExpectancy')?.value);
+    
+    // Validation
+    if (!currentAge || !state || !taxFilingStatus || !projectionMode || !retirementAge || !lifeExpectancy) {
+        alert('Please fill in all fields');
+        console.error('❌ Missing fields');
+        return;
+    }
     
     userProfile = {
         currentAge,
@@ -261,31 +342,44 @@ window.saveProfile = async function() {
         updatedAt: new Date().toISOString()
     };
     
+    console.log('📝 Saving profile:', userProfile);
+    
     const userId = getUserId();
-    if (!userId) return;
+    if (!userId) {
+        alert('Please log in to save settings');
+        console.error('❌ No user ID');
+        return;
+    }
     
     try {
         await database.ref(`users/${userId}/profile`).set(userProfile);
+        console.log('✅ Profile saved to Firebase');
         
-        // Show success
-        const btn = document.querySelector('.btn-primary');
-        const originalText = btn.textContent;
-        btn.textContent = '✓ Saved!';
-        btn.style.background = 'var(--apple-green)';
-        
-        setTimeout(() => {
-            btn.textContent = originalText;
-            btn.style.background = '';
-        }, 2000);
+        // Show success feedback
+        const btn = document.getElementById('saveProfileBtn');
+        if (btn) {
+            const originalText = btn.textContent;
+            const originalBg = btn.style.background;
+            
+            btn.textContent = '✓ Saved!';
+            btn.style.background = '#34C759';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.background = originalBg;
+                btn.disabled = false;
+            }, 2000);
+        }
         
         // Trigger update events
         window.dispatchEvent(new CustomEvent('profileUpdated', { detail: { profile: userProfile } }));
         
     } catch (error) {
-        console.error('Error saving profile:', error);
-        alert('Error saving settings');
+        console.error('❌ Error saving profile:', error);
+        alert('Error saving settings: ' + error.message);
     }
-};
+}
 
 function getStateTaxInfo(state) {
     const noTaxStates = ['AK', 'FL', 'NV', 'SD', 'TN', 'TX', 'WA', 'WY'];
@@ -295,7 +389,6 @@ function getStateTaxInfo(state) {
         'NJ': 'New Jersey has progressive rates from 1.4% to 10.75%',
         'OR': 'Oregon has progressive rates from 4.75% to 9.9%',
         'MN': 'Minnesota has progressive rates from 5.35% to 9.85%',
-        'DC': 'D.C. has progressive rates from 4% to 10.75%',
         'HI': 'Hawaii has progressive rates from 1.4% to 11%'
     };
     
@@ -384,30 +477,16 @@ export function calculateStateTax(income, state) {
     
     // Simplified estimates for other states
     const stateRates = {
-        'NY': 0.065,  // ~6.5% average
-        'NJ': 0.065,  // ~6.5% average
-        'OR': 0.08,   // ~8% average
-        'MN': 0.075,  // ~7.5% average
-        'HI': 0.08,   // ~8% average
-        'MA': 0.05,   // 5% flat
-        'CT': 0.065,  // ~6.5% average
-        'IL': 0.0495, // 4.95% flat
-        'PA': 0.0307, // 3.07% flat
-        'CO': 0.044,  // 4.4% flat
-        'NC': 0.045,  // 4.5% flat
-        'UT': 0.0465, // 4.65% flat
-        'AZ': 0.025,  // 2.5% flat
-        'GA': 0.055,  // ~5.5% average
-        'VA': 0.055,  // ~5.5% average
-        'OH': 0.04,   // ~4% average
-        'MI': 0.0425, // 4.25% flat
-        'WI': 0.065,  // ~6.5% average
+        'NY': 0.065, 'NJ': 0.065, 'OR': 0.08, 'MN': 0.075,
+        'HI': 0.08, 'MA': 0.05, 'CT': 0.065, 'IL': 0.0495,
+        'PA': 0.0307, 'CO': 0.044, 'NC': 0.045, 'UT': 0.0465,
+        'AZ': 0.025, 'GA': 0.055, 'VA': 0.055, 'OH': 0.04,
+        'MI': 0.0425, 'WI': 0.065
     };
     
-    const rate = stateRates[state] || 0.05; // Default 5% if state not listed
+    const rate = stateRates[state] || 0.05;
     return Math.round(income * rate);
 }
 
 console.log('✅ Profile module loaded');
-initProfile();
 export { userProfile };
