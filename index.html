@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wealth - Retirement Planning</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <!-- Auth Container -->
@@ -15,16 +15,16 @@
             
             <div id="loginForm">
                 <h2>Login</h2>
-                <input type="email" id="loginEmail" placeholder="Email">
-                <input type="password" id="loginPassword" placeholder="Password">
+                <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
+                <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
                 <button id="loginBtn" class="primary-button">Login</button>
                 <p class="auth-toggle">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
             </div>
             
             <div id="signupForm" style="display: none;">
                 <h2>Sign Up</h2>
-                <input type="email" id="signupEmail" placeholder="Email">
-                <input type="password" id="signupPassword" placeholder="Password">
+                <input type="email" id="signupEmail" placeholder="Email" autocomplete="email">
+                <input type="password" id="signupPassword" placeholder="Password" autocomplete="new-password">
                 <button id="signupBtn" class="primary-button">Sign Up</button>
                 <p class="auth-toggle">Already have an account? <a href="#" id="showLogin">Login</a></p>
             </div>
@@ -37,7 +37,7 @@
         <nav class="desktop-nav">
             <div class="nav-brand">💰 Wealth</div>
             <div class="nav-items">
-                <a href="#" class="nav-item" data-page="dashboard">
+                <a href="#" class="nav-item active" data-page="dashboard">
                     <span class="nav-icon">📊</span>
                     <span>Overview</span>
                 </a>
@@ -69,10 +69,6 @@
                     <span class="nav-icon">📝</span>
                     <span>Taxes</span>
                 </a>
-                <a href="#" class="nav-item" data-page="ai-assistant">
-                    <span class="nav-icon">🤖</span>
-                    <span>AI Assistant</span>
-                </a>
                 <a href="#" class="nav-item" data-page="settings">
                     <span class="nav-icon">⚙️</span>
                     <span>Settings</span>
@@ -102,7 +98,6 @@
             <a href="#" class="nav-menu-item" data-page="retirement">🏦 Retirement</a>
             <a href="#" class="nav-menu-item" data-page="social-security">🇺🇸 Social Security</a>
             <a href="#" class="nav-menu-item" data-page="taxes">📝 Taxes</a>
-            <a href="#" class="nav-menu-item" data-page="ai-assistant">🤖 AI Assistant</a>
             <a href="#" class="nav-menu-item" data-page="settings">⚙️ Settings</a>
             <div class="nav-menu-footer">
                 <button id="mobileLogoutBtn" class="logout-btn">Logout</button>
@@ -116,7 +111,7 @@
 
         <!-- Mobile Bottom Navigation -->
         <nav class="mobile-nav">
-            <a href="#" class="mobile-nav-item" data-page="dashboard">
+            <a href="#" class="mobile-nav-item active" data-page="dashboard">
                 <span class="mobile-nav-icon">📊</span>
                 <span class="mobile-nav-label">Overview</span>
             </a>
@@ -124,9 +119,9 @@
                 <span class="mobile-nav-icon">📈</span>
                 <span class="mobile-nav-label">Invest</span>
             </a>
-            <a href="#" class="mobile-nav-item" data-page="ai-assistant">
-                <span class="mobile-nav-icon">🤖</span>
-                <span class="mobile-nav-label">AI Help</span>
+            <a href="#" class="mobile-nav-item" data-page="retirement">
+                <span class="mobile-nav-icon">🏦</span>
+                <span class="mobile-nav-label">Retire</span>
             </a>
             <a href="#" class="mobile-nav-item" data-page="expenses">
                 <span class="mobile-nav-icon">💳</span>
@@ -135,7 +130,12 @@
         </nav>
     </div>
 
-    <!-- Firebase and App Scripts -->
+    <!-- Firebase SDKs - MUST BE LOADED FIRST BEFORE ANY MODULE SCRIPTS -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <!-- Your App Module Scripts - Load AFTER Firebase -->
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/auth.js"></script>
     <script type="module" src="js/utils.js"></script>
@@ -148,7 +148,6 @@
     <script type="module" src="js/retirement401k.js"></script>
     <script type="module" src="js/socialSecurity.js"></script>
     <script type="module" src="js/taxProjections.js"></script>
-    <script type="module" src="js/aiAssistant.js"></script>
     <script type="module" src="js/app.js"></script>
 </body>
 </html>
