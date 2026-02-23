@@ -1,461 +1,237 @@
-/* Wealth - Retirement Planner - Complete Styles */
+// Dashboard Module - With Real Data Loading
+import { database } from './config.js';
+import { getUserId } from './auth.js';
 
-/* ===== RESET & BASE ===== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+let userProfile = {};
+let familyMembers = {};
+let incomes = [];
 
-:root {
-    --apple-blue: #007AFF;
-    --apple-green: #34C759;
-    --apple-red: #FF3B30;
-    --apple-orange: #FF9500;
-    --apple-purple: #AF52DE;
-    --text-primary: #1d1d1f;
-    --text-secondary: #6e6e73;
-    --bg-primary: #ffffff;
-    --bg-secondary: #f5f5f7;
-    --border-color: #d2d2d7;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    --shadow-large: 0 4px 20px rgba(0, 0, 0, 0.12);
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* ===== AUTH CONTAINER ===== */
-#authContainer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    padding: 20px;
-}
-
-.auth-box {
-    background: white;
-    padding: 48px;
-    border-radius: 24px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    width: 100%;
-    max-width: 420px;
-}
-
-.auth-box h1 {
-    font-size: 42px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    text-align: center;
-}
-
-.auth-box > p {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 17px;
-    margin-bottom: 32px;
-}
-
-.auth-box h2 {
-    font-size: 28px;
-    font-weight: 600;
-    margin-bottom: 24px;
-}
-
-.auth-box input {
-    width: 100%;
-    padding: 16px;
-    margin-bottom: 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    font-size: 16px;
-    transition: border-color 0.2s;
-}
-
-.auth-box input:focus {
-    outline: none;
-    border-color: var(--apple-blue);
-}
-
-.primary-button {
-    width: 100%;
-    padding: 16px;
-    background: var(--apple-blue);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-size: 17px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-bottom: 16px;
-    transition: background 0.2s;
-}
-
-.primary-button:hover {
-    background: #0051D5;
-}
-
-.primary-button:active {
-    transform: scale(0.98);
-}
-
-.auth-toggle {
-    text-align: center;
-    font-size: 15px;
-    color: var(--text-secondary);
-}
-
-.auth-toggle a {
-    color: var(--apple-blue);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.auth-toggle a:hover {
-    text-decoration: underline;
-}
-
-/* ===== DESKTOP NAVIGATION ===== */
-.desktop-nav {
-    display: none;
-    background: var(--bg-primary);
-    padding: 0 24px;
-    box-shadow: var(--shadow);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.nav-brand {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.nav-items {
-    display: flex;
-    gap: 4px;
-    flex: 1;
-    justify-content: center;
-}
-
-.nav-item {
-    padding: 16px 12px;
-    text-decoration: none;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border-bottom: 3px solid transparent;
-    transition: all 0.2s;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.nav-item:hover {
-    color: var(--apple-blue);
-    background: rgba(0, 122, 255, 0.05);
-}
-
-.nav-item.active {
-    color: var(--apple-blue);
-    border-bottom-color: var(--apple-blue);
-}
-
-.nav-icon {
-    font-size: 18px;
-}
-
-.logout-btn {
-    padding: 10px 20px;
-    background: var(--bg-secondary);
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 500;
-    color: var(--text-primary);
-    transition: all 0.2s;
-}
-
-.logout-btn:hover {
-    background: var(--border-color);
-}
-
-/* ===== HAMBURGER MENU (MOBILE) ===== */
-.hamburger {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    padding: 12px;
-    cursor: pointer;
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 150;
-    background: white;
-    border-radius: 10px;
-    box-shadow: var(--shadow);
-}
-
-.hamburger span {
-    width: 28px;
-    height: 3px;
-    background: var(--text-primary);
-    border-radius: 2px;
-    transition: all 0.3s;
-}
-
-.nav-menu {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: white;
-    z-index: 150;
-    padding: 80px 20px 20px;
-    overflow-y: auto;
-}
-
-.nav-menu.active {
-    display: block;
-    animation: slideIn 0.3s ease-out;
-}
-
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateX(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.nav-menu-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 32px;
-}
-
-.nav-menu-header h2 {
-    font-size: 28px;
-    font-weight: 700;
-}
-
-.close-menu {
-    font-size: 32px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-
-.nav-menu-item {
-    display: block;
-    padding: 18px 0;
-    text-decoration: none;
-    color: var(--text-primary);
-    font-size: 20px;
-    font-weight: 500;
-    border-bottom: 1px solid var(--bg-secondary);
-    transition: all 0.2s;
-}
-
-.nav-menu-item:hover {
-    color: var(--apple-blue);
-    padding-left: 8px;
-}
-
-.nav-menu-footer {
-    margin-top: 32px;
-}
-
-/* ===== MAIN CONTENT ===== */
-.main-content {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding-bottom: 100px; /* Space for mobile nav */
-}
-
-/* ===== MOBILE BOTTOM NAV ===== */
-.mobile-nav {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 200;
-    padding: 8px 0;
-}
-
-.mobile-nav-item {
-    flex: 1;
-    padding: 8px;
-    text-decoration: none;
-    color: var(--text-secondary);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.mobile-nav-item.active {
-    color: var(--apple-blue);
-}
-
-.mobile-nav-icon {
-    font-size: 26px;
-}
-
-.mobile-nav-label {
-    font-size: 11px;
-}
-
-/* ===== CARDS ===== */
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: var(--shadow);
-}
-
-.card-title {
-    font-size: 24px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-}
-
-/* ===== FORMS ===== */
-.form-group {
-    margin-bottom: 24px;
-}
-
-.form-label {
-    display: block;
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-}
-
-.form-input,
-.form-select {
-    width: 100%;
-    padding: 14px 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 12px;
-    font-size: 16px;
-    font-family: inherit;
-    background: white;
-    color: var(--text-primary);
-    transition: border-color 0.2s;
-}
-
-.form-input:focus,
-.form-select:focus {
-    outline: none;
-    border-color: var(--apple-blue);
-}
-
-/* ===== BUTTONS ===== */
-.btn {
-    padding: 14px 24px;
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.btn-primary {
-    background: var(--apple-blue);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #0051D5;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
-}
-
-.btn-primary:active {
-    transform: translateY(0);
-}
-
-.btn-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-/* ===== DESKTOP VIEW ===== */
-@media (min-width: 768px) {
-    .desktop-nav {
-        display: flex;
+export function initDashboard() {
+    console.log('📊 Initializing Dashboard...');
+    
+    const container = document.getElementById('content');
+    if (!container) {
+        console.error('❌ Content container not found');
+        return;
     }
     
-    .mobile-nav,
-    .hamburger {
-        display: none;
+    // Load all data
+    loadDashboardData();
+}
+
+async function loadDashboardData() {
+    const userId = getUserId();
+    if (!userId) {
+        console.error('❌ No user ID');
+        return;
     }
     
-    .main-content {
-        padding: 40px;
-        padding-bottom: 40px;
+    try {
+        // Load profile
+        const profileSnapshot = await database.ref(`users/${userId}/profile`).once('value');
+        userProfile = profileSnapshot.val() || {};
+        
+        // Load family members
+        const familySnapshot = await database.ref(`users/${userId}/familyMembers`).once('value');
+        const familyData = familySnapshot.val() || {};
+        familyMembers = Object.values(familyData);
+        
+        // Load incomes
+        const incomeSnapshot = await database.ref(`users/${userId}/incomes`).once('value');
+        const incomeData = incomeSnapshot.val() || {};
+        incomes = Object.values(incomeData);
+        
+        console.log('✅ Dashboard data loaded:', { userProfile, familyMembers, incomes });
+        
+        // Render the dashboard
+        renderDashboard();
+        
+    } catch (error) {
+        console.error('❌ Error loading dashboard data:', error);
+        renderDashboard(); // Render anyway with empty data
+    }
+}
+
+function renderDashboard() {
+    const container = document.getElementById('content');
+    if (!container) return;
+    
+    // Calculate stats
+    const totalIncome = incomes.reduce((sum, inc) => sum + (inc.annualAmount || 0), 0);
+    const currentAge = userProfile.currentAge || 'Not set';
+    const retirementAge = userProfile.retirementAge || 67;
+    const yearsToRetirement = typeof currentAge === 'number' ? Math.max(0, retirementAge - currentAge) : '--';
+    
+    container.innerHTML = `
+        <div class="card">
+            <h2 class="card-title">📊 Welcome to Wealth!</h2>
+            <p style="font-size: 17px; color: #666; margin-bottom: 24px;">
+                Your personal retirement planning dashboard
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">
+                <div class="stat-card">
+                    <div class="stat-label">Your Age</div>
+                    <div class="stat-value">${currentAge}</div>
+                    <div class="stat-change">${typeof currentAge === 'number' ? 'Born ' + (new Date().getFullYear() - currentAge) : 'Set in Settings'}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Annual Income</div>
+                    <div class="stat-value">${formatCurrency(totalIncome)}</div>
+                    <div class="stat-change">${incomes.length} source${incomes.length !== 1 ? 's' : ''}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Years to Retirement</div>
+                    <div class="stat-value">${yearsToRetirement}</div>
+                    <div class="stat-change">Target age ${retirementAge}</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-label">Family Members</div>
+                    <div class="stat-value">${familyMembers.length}</div>
+                    <div class="stat-change">${familyMembers.length === 0 ? 'Add in Family tab' : 'View in Family tab'}</div>
+                </div>
+            </div>
+        </div>
+        
+        ${familyMembers.length > 0 ? `
+        <div class="card">
+            <h3 class="card-title">👨‍👩‍👧‍👦 Your Family</h3>
+            <div style="display: grid; gap: 12px; margin-top: 16px;">
+                ${familyMembers.map(member => `
+                    <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 17px; margin-bottom: 4px;">${member.name}</div>
+                            <div style="font-size: 15px; color: #666;">
+                                ${member.relationship} • Age ${member.age || calculateAge(member.birthDate)}
+                            </div>
+                        </div>
+                        <div style="font-size: 13px; color: #999;">
+                            Born ${formatDate(member.birthDate)}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        ${incomes.length > 0 ? `
+        <div class="card">
+            <h3 class="card-title">💵 Income Summary</h3>
+            <div style="display: grid; gap: 12px; margin-top: 16px;">
+                ${incomes.map(income => `
+                    <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 17px; margin-bottom: 4px;">${income.source}</div>
+                            <div style="font-size: 15px; color: #666;">
+                                ${income.familyMemberName || 'Household'} • ${income.type}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-size: 20px; color: #34C759;">${formatCurrency(income.annualAmount)}</div>
+                            <div style="font-size: 13px; color: #999;">${formatCurrency(income.monthlyAmount)}/mo</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+        ` : ''}
+        
+        <div class="card">
+            <h3 class="card-title">🚀 Getting Started</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+                ${currentAge === 'Not set' ? `
+                <div style="padding: 16px; background: #FFF3CD; border-radius: 12px; border-left: 4px solid #FF9500;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">⚠️ Set up your profile</div>
+                    <div style="font-size: 15px; color: #666;">Go to Settings to add your age, state, and retirement goals</div>
+                </div>
+                ` : ''}
+                
+                ${familyMembers.length === 0 ? `
+                <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #34C759;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">2. Add family members</div>
+                    <div style="font-size: 15px; color: #666;">Track your household and link income to family members</div>
+                </div>
+                ` : ''}
+                
+                ${incomes.length === 0 ? `
+                <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #FF9500;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">3. Add income sources</div>
+                    <div style="font-size: 15px; color: #666;">Track salaries, business income, and investments</div>
+                </div>
+                ` : ''}
+                
+                <div style="padding: 16px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #AF52DE;">
+                    <div style="font-weight: 600; margin-bottom: 4px;">4. Plan for retirement</div>
+                    <div style="font-size: 15px; color: #666;">Set goals and track your progress</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add styles for stat cards
+    if (!document.getElementById('dashboardStyles')) {
+        const style = document.createElement('style');
+        style.id = 'dashboardStyles';
+        style.textContent = `
+            .stat-card {
+                padding: 20px;
+                background: white;
+                border-radius: 12px;
+                border: 1px solid #e0e0e0;
+            }
+            .stat-label {
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }
+            .stat-value {
+                font-size: 32px;
+                font-weight: 700;
+                color: #1d1d1f;
+                margin-bottom: 4px;
+            }
+            .stat-change {
+                font-size: 13px;
+                color: #999;
+            }
+        `;
+        document.head.appendChild(style);
     }
     
-    .auth-box {
-        padding: 56px;
+    console.log('✅ Dashboard rendered');
+}
+
+function formatCurrency(amount) {
+    if (!amount && amount !== 0) return '$0';
+    return '$' + Math.round(amount).toLocaleString('en-US');
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
+
+function calculateAge(birthDate) {
+    if (!birthDate) return 0;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
     }
+    
+    return age;
 }
 
-/* ===== TABLET VIEW ===== */
-@media (min-width: 1024px) {
-    .main-content {
-        padding: 48px;
-    }
-}
-
-/* ===== UTILITIES ===== */
-.hidden {
-    display: none !important;
-}
-
-.text-center {
-    text-align: center;
-}
-
-.mt-2 {
-    margin-top: 16px;
-}
-
-.mb-2 {
-    margin-bottom: 16px;
-}
+console.log('✅ Dashboard module loaded');
