@@ -1,153 +1,204 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wealth - Retirement Planning</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <!-- Auth Container -->
-    <div id="authContainer">
-        <div class="auth-box">
-            <h1>💰 Wealth</h1>
-            <p>Your Personal Retirement Planner</p>
-            
-            <div id="loginForm">
-                <h2>Login</h2>
-                <input type="email" id="loginEmail" placeholder="Email" autocomplete="email">
-                <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password">
-                <button id="loginBtn" class="primary-button">Login</button>
-                <p class="auth-toggle">Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
-            </div>
-            
-            <div id="signupForm" style="display: none;">
-                <h2>Sign Up</h2>
-                <input type="email" id="signupEmail" placeholder="Email" autocomplete="email">
-                <input type="password" id="signupPassword" placeholder="Password" autocomplete="new-password">
-                <button id="signupBtn" class="primary-button">Sign Up</button>
-                <p class="auth-toggle">Already have an account? <a href="#" id="showLogin">Login</a></p>
-            </div>
-        </div>
-    </div>
+// Dashboard Module - With Real Data Loading
+import { database } from './config.js';
+import { getUserId } from './auth.js';
 
-    <!-- Main App Container -->
-    <div id="appContainer" style="display: none;">
-        <!-- Desktop Navigation -->
-        <nav class="desktop-nav">
-            <div class="nav-brand">💰 Wealth</div>
-            <div class="nav-items">
-                <a href="#" class="nav-item active" data-page="dashboard">
-                    <span class="nav-icon">📊</span>
-                    <span>Overview</span>
-                </a>
-                <a href="#" class="nav-item" data-page="family">
-                    <span class="nav-icon">👨‍👩‍👧‍👦</span>
-                    <span>Family</span>
-                </a>
-                <a href="#" class="nav-item" data-page="income">
-                    <span class="nav-icon">💵</span>
-                    <span>Income</span>
-                </a>
-                <a href="#" class="nav-item" data-page="expenses">
-                    <span class="nav-icon">💳</span>
-                    <span>Expenses</span>
-                </a>
-                <a href="#" class="nav-item" data-page="investments">
-                    <span class="nav-icon">📈</span>
-                    <span>Investments</span>
-                </a>
-                <a href="#" class="nav-item" data-page="retirement">
-                    <span class="nav-icon">🏦</span>
-                    <span>Retirement</span>
-                </a>
-                <a href="#" class="nav-item" data-page="social-security">
-                    <span class="nav-icon">🇺🇸</span>
-                    <span>Social Security</span>
-                </a>
-                <a href="#" class="nav-item" data-page="taxes">
-                    <span class="nav-icon">📝</span>
-                    <span>Taxes</span>
-                </a>
-                <a href="#" class="nav-item" data-page="settings">
-                    <span class="nav-icon">⚙️</span>
-                    <span>Settings</span>
-                </a>
-            </div>
-            <button id="logoutBtn" class="logout-btn">Logout</button>
-        </nav>
+let userProfile = {};
+let familyMembers = {};
+let incomes = [];
 
-        <!-- Hamburger Menu (Mobile) -->
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+export function initDashboard() {
+    console.log('📊 Initializing Dashboard...');
+    
+    const container = document.getElementById('content');
+    if (!container) {
+        console.error('Content container not found');
+        return;
+    }
+    
+    loadDashboardData();
+}
 
-        <!-- Mobile Nav Menu -->
-        <div class="nav-menu">
-            <div class="nav-menu-header">
-                <h2>💰 Wealth</h2>
-                <button class="close-menu">✕</button>
-            </div>
-            <a href="#" class="nav-menu-item" data-page="dashboard">📊 Dashboard</a>
-            <a href="#" class="nav-menu-item" data-page="family">👨‍👩‍👧‍👦 Family</a>
-            <a href="#" class="nav-menu-item" data-page="income">💵 Income</a>
-            <a href="#" class="nav-menu-item" data-page="expenses">💳 Expenses</a>
-            <a href="#" class="nav-menu-item" data-page="investments">📈 Investments</a>
-            <a href="#" class="nav-menu-item" data-page="retirement">🏦 Retirement</a>
-            <a href="#" class="nav-menu-item" data-page="social-security">🇺🇸 Social Security</a>
-            <a href="#" class="nav-menu-item" data-page="taxes">📝 Taxes</a>
-            <a href="#" class="nav-menu-item" data-page="settings">⚙️ Settings</a>
-            <div class="nav-menu-footer">
-                <button id="mobileLogoutBtn" class="logout-btn">Logout</button>
-            </div>
-        </div>
+async function loadDashboardData() {
+    const userId = getUserId();
+    if (!userId) {
+        console.error('No user ID');
+        return;
+    }
+    
+    try {
+        const profileSnapshot = await database.ref('users/' + userId + '/profile').once('value');
+        userProfile = profileSnapshot.val() || {};
+        
+        const familySnapshot = await database.ref('users/' + userId + '/familyMembers').once('value');
+        const familyData = familySnapshot.val() || {};
+        familyMembers = Object.values(familyData);
+        
+        const incomeSnapshot = await database.ref('users/' + userId + '/incomes').once('value');
+        const incomeData = incomeSnapshot.val() || {};
+        incomes = Object.values(incomeData);
+        
+        console.log('Dashboard data loaded:', { userProfile, familyMembers, incomes });
+        
+        renderDashboard();
+        
+    } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        renderDashboard();
+    }
+}
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div id="content"></div>
-        </main>
+function renderDashboard() {
+    const container = document.getElementById('content');
+    if (!container) return;
+    
+    const totalIncome = incomes.reduce((sum, inc) => sum + (inc.annualAmount || 0), 0);
+    const currentAge = userProfile.currentAge || 'Not set';
+    const retirementAge = userProfile.retirementAge || 67;
+    const yearsToRetirement = typeof currentAge === 'number' ? Math.max(0, retirementAge - currentAge) : '--';
+    
+    let html = '<div class="card">';
+    html += '<h2 class="card-title">Welcome to Wealth!</h2>';
+    html += '<p style="font-size: 17px; color: #666; margin-bottom: 24px;">Your personal retirement planning dashboard</p>';
+    
+    html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 24px;">';
+    
+    html += '<div class="stat-card">';
+    html += '<div class="stat-label">Your Age</div>';
+    html += '<div class="stat-value">' + currentAge + '</div>';
+    html += '<div class="stat-change">' + (typeof currentAge === 'number' ? 'Born ' + (new Date().getFullYear() - currentAge) : 'Set in Settings') + '</div>';
+    html += '</div>';
+    
+    html += '<div class="stat-card">';
+    html += '<div class="stat-label">Annual Income</div>';
+    html += '<div class="stat-value">' + formatCurrency(totalIncome) + '</div>';
+    html += '<div class="stat-change">' + incomes.length + ' source' + (incomes.length !== 1 ? 's' : '') + '</div>';
+    html += '</div>';
+    
+    html += '<div class="stat-card">';
+    html += '<div class="stat-label">Years to Retirement</div>';
+    html += '<div class="stat-value">' + yearsToRetirement + '</div>';
+    html += '<div class="stat-change">Target age ' + retirementAge + '</div>';
+    html += '</div>';
+    
+    html += '<div class="stat-card">';
+    html += '<div class="stat-label">Family Members</div>';
+    html += '<div class="stat-value">' + familyMembers.length + '</div>';
+    html += '<div class="stat-change">' + (familyMembers.length === 0 ? 'Add in Family tab' : 'View in Family tab') + '</div>';
+    html += '</div>';
+    
+    html += '</div></div>';
+    
+    if (familyMembers.length > 0) {
+        html += '<div class="card">';
+        html += '<h3 class="card-title">Your Family</h3>';
+        html += '<div style="display: grid; gap: 12px; margin-top: 16px;">';
+        
+        familyMembers.forEach(member => {
+            html += '<div style="padding: 16px; background: #f8f9fa; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">';
+            html += '<div>';
+            html += '<div style="font-weight: 600; font-size: 17px; margin-bottom: 4px;">' + member.name + '</div>';
+            html += '<div style="font-size: 15px; color: #666;">';
+            html += member.relationship + ' • Age ' + (member.age || calculateAge(member.birthDate));
+            html += '</div></div>';
+            html += '<div style="font-size: 13px; color: #999;">Born ' + formatDate(member.birthDate) + '</div>';
+            html += '</div>';
+        });
+        
+        html += '</div></div>';
+    }
+    
+    if (incomes.length > 0) {
+        html += '<div class="card">';
+        html += '<h3 class="card-title">Income Summary</h3>';
+        html += '<div style="display: grid; gap: 12px; margin-top: 16px;">';
+        
+        incomes.forEach(income => {
+            html += '<div style="padding: 16px; background: #f8f9fa; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">';
+            html += '<div>';
+            html += '<div style="font-weight: 600; font-size: 17px; margin-bottom: 4px;">' + income.source + '</div>';
+            html += '<div style="font-size: 15px; color: #666;">';
+            html += (income.familyMemberName || 'Household') + ' • ' + income.type;
+            html += '</div></div>';
+            html += '<div style="text-align: right;">';
+            html += '<div style="font-weight: 700; font-size: 20px; color: #34C759;">' + formatCurrency(income.annualAmount) + '</div>';
+            html += '<div style="font-size: 13px; color: #999;">' + formatCurrency(income.monthlyAmount) + '/mo</div>';
+            html += '</div></div>';
+        });
+        
+        html += '</div></div>';
+    }
+    
+    html += '<div class="card">';
+    html += '<h3 class="card-title">Getting Started</h3>';
+    html += '<div style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">';
+    
+    if (currentAge === 'Not set') {
+        html += '<div style="padding: 16px; background: #FFF3CD; border-radius: 12px; border-left: 4px solid #FF9500;">';
+        html += '<div style="font-weight: 600; margin-bottom: 4px;">Set up your profile</div>';
+        html += '<div style="font-size: 15px; color: #666;">Go to Settings to add your age, state, and retirement goals</div>';
+        html += '</div>';
+    }
+    
+    if (familyMembers.length === 0) {
+        html += '<div style="padding: 16px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #34C759;">';
+        html += '<div style="font-weight: 600; margin-bottom: 4px;">Add family members</div>';
+        html += '<div style="font-size: 15px; color: #666;">Track your household and link income to family members</div>';
+        html += '</div>';
+    }
+    
+    if (incomes.length === 0) {
+        html += '<div style="padding: 16px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #FF9500;">';
+        html += '<div style="font-weight: 600; margin-bottom: 4px;">Add income sources</div>';
+        html += '<div style="font-size: 15px; color: #666;">Track salaries, business income, and investments</div>';
+        html += '</div>';
+    }
+    
+    html += '<div style="padding: 16px; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #AF52DE;">';
+    html += '<div style="font-weight: 600; margin-bottom: 4px;">Plan for retirement</div>';
+    html += '<div style="font-size: 15px; color: #666;">Set goals and track your progress</div>';
+    html += '</div>';
+    
+    html += '</div></div>';
+    
+    container.innerHTML = html;
+    
+    if (!document.getElementById('dashboardStyles')) {
+        const style = document.createElement('style');
+        style.id = 'dashboardStyles';
+        style.textContent = '.stat-card { padding: 20px; background: white; border-radius: 12px; border: 1px solid #e0e0e0; } .stat-label { font-size: 14px; color: #666; margin-bottom: 8px; font-weight: 500; } .stat-value { font-size: 32px; font-weight: 700; color: #1d1d1f; margin-bottom: 4px; } .stat-change { font-size: 13px; color: #999; }';
+        document.head.appendChild(style);
+    }
+    
+    console.log('Dashboard rendered');
+}
 
-        <!-- Mobile Bottom Navigation -->
-        <nav class="mobile-nav">
-            <a href="#" class="mobile-nav-item active" data-page="dashboard">
-                <span class="mobile-nav-icon">📊</span>
-                <span class="mobile-nav-label">Overview</span>
-            </a>
-            <a href="#" class="mobile-nav-item" data-page="investments">
-                <span class="mobile-nav-icon">📈</span>
-                <span class="mobile-nav-label">Invest</span>
-            </a>
-            <a href="#" class="mobile-nav-item" data-page="retirement">
-                <span class="mobile-nav-icon">🏦</span>
-                <span class="mobile-nav-label">Retire</span>
-            </a>
-            <a href="#" class="mobile-nav-item" data-page="expenses">
-                <span class="mobile-nav-icon">💳</span>
-                <span class="mobile-nav-label">Spend</span>
-            </a>
-        </nav>
-    </div>
+function formatCurrency(amount) {
+    if (!amount && amount !== 0) return '$0';
+    return '$' + Math.round(amount).toLocaleString('en-US');
+}
 
-    <!-- Firebase SDKs - MUST BE LOADED FIRST -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+function formatDate(dateString) {
+    if (!dateString) return 'Unknown';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+    });
+}
 
-    <!-- Your App Module Scripts - Load AFTER Firebase -->
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/auth.js"></script>
-    <script type="module" src="js/utils.js"></script>
-    <script type="module" src="js/profile.js"></script>
-    <script type="module" src="js/familyMembers.js"></script>
-    <script type="module" src="js/income.js"></script>
-    <script type="module" src="js/dashboard.js"></script>
-    <script type="module" src="js/expenses.js"></script>
-    <script type="module" src="js/investments.js"></script>
-    <script type="module" src="js/retirement401k.js"></script>
-    <script type="module" src="js/socialSecurity.js"></script>
-    <script type="module" src="js/taxProjections.js"></script>
-    <script type="module" src="js/app.js"></script>
-</body>
-</html>
+function calculateAge(birthDate) {
+    if (!birthDate) return 0;
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    
+    return age;
+}
+
+console.log('Dashboard module loaded');
